@@ -25,7 +25,7 @@ jobs:
         pip install dash dash-daq dash-bootstrap-components numpy plotly pandas flaskwebgui pyinstaller
     - name: PyInstaller
       run: |
-        pyinstaller.exe -F -w --add-data ".\assets\*;.\assets\" .\app.py
+        pyinstaller.exe --add-data ".\assets\*;.\assets\" .\app.py
     - name: Archive built module
       uses: actions/upload-artifact@v2
       if: success()
