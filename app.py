@@ -888,4 +888,4 @@ def integration_gain(
 
 if __name__ == "__main__":
     # app.run_server(debug=True, threaded=True, processes=1, host="0.0.0.0")
-    FlaskUI(server, server="flask").run()
+    FlaskUI(app=server, server="flask").run()
