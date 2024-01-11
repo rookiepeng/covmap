@@ -22,7 +22,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install dash dash-daq dash-bootstrap-components numpy plotly pandas flaskwebgui pyinstaller
+        pip install dash dash-daq dash-bootstrap-components numpy scipy plotly pandas flaskwebgui pyinstaller
     - name: PyInstaller
       run: |
         pyinstaller.exe --add-data ".\assets\*;.\assets\" .\app.py
