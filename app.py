@@ -24,6 +24,8 @@ from roc.tools import roc_snr
 
 from layout.layout import get_app_layout
 
+from flaskwebgui import FlaskUI
+
 import json
 import os
 import base64
@@ -885,5 +887,5 @@ def integration_gain(
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True, threaded=True, processes=1, host="0.0.0.0")
-    # FlaskUI(app.server).run()
+    # app.run_server(debug=True, threaded=True, processes=1, host="0.0.0.0")
+    FlaskUI(app.server).run()
