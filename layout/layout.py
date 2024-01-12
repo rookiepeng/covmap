@@ -625,6 +625,7 @@ plot_card = dbc.Card(
         ),
     ],
     style={"border-top-left-radius": "0", "border-top-right-radius": "0"},
+    class_name="mt-3",
 )
 
 
@@ -637,11 +638,11 @@ def get_app_layout():
             dcc.Store(id="sensor-store", data=[], storage_type="local"),
             dcc.Download(id="download"),
             plot_card,
-            html.Hr(),
-            dcc.Markdown(
-                "v3.2 | By [Zhengyu Peng](mailto:zhengyu.peng@aptiv.com)",
-                className="pb-2",
-            ),
+            # html.Hr(),
+            # dcc.Markdown(
+            #     "v3.2 | By [Zhengyu Peng](mailto:zhengyu.peng@aptiv.com)",
+            #     className="pb-2",
+            # ),
         ],
         fluid=True,
         className="dbc_light",
