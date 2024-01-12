@@ -1,0 +1,10 @@
+dash
+dash-daq
+dash-bootstrap-components
+numpy
+scipy
+plotly
+pandas
+flaskwebgui
+waitress
+kaleido==v0.1.0.post1
