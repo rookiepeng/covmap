@@ -839,53 +839,6 @@ def link_height(height_input, height_slider):
     return value, value
 
 
-@app.callback(
-    output=dict(
-        minsnr_str=Output("roc-minsnr", "children"),
-        gain_str=Output("roc-gain", "children"),
-    ),
-    inputs=dict(
-        pd=Input("roc-pd", "value"),
-        pfa=Input("roc-pfa", "value"),
-        n=Input("roc-n", "value"),
-        sw_model=Input("roc-integration", "value"),
-    ),
-    state=dict(
-        min_pd=State("roc-pd", "min"),
-        max_pd=State("roc-pd", "max"),
-        min_pfa=State("roc-pfa", "min"),
-        max_pfa=State("roc-pfa", "max"),
-        min_n=State("roc-n", "min"),
-        max_n=State("roc-n", "max"),
-    ),
-)
-def integration_gain(
-    pd, pfa, n, sw_model, min_pd, max_pd, min_pfa, max_pfa, min_n, max_n
-):
-    if pd is None:
-        raise PreventUpdate
-    elif pd < min_pd or pd > max_pd:
-        raise PreventUpdate
-
-    if pfa is None:
-        raise PreventUpdate
-    elif pfa < min_pfa or pfa > max_pfa:
-        raise PreventUpdate
-
-    if n is None:
-        raise PreventUpdate
-    elif n < min_n or n > max_n:
-        raise PreventUpdate
-
-    min_snr = roc_snr(pfa, pd, 1, sw_model)
-    nci_gain = roc_snr(pfa, pd, 1, sw_model) - roc_snr(pfa, pd, n, sw_model)
-
-    return dict(
-        minsnr_str="Min SNR: " + str(round(min_snr, 4)) + " dB",
-        gain_str="Gain: " + str(round(nci_gain, 4)) + " dB",
-    )
-
-
 if __name__ == "__main__":
     # app.run_server(debug=True, threaded=True, processes=1, host="0.0.0.0")
     FlaskUI(app=server, server="flask").run()

@@ -31,5 +31,5 @@ jobs:
       uses: actions/upload-artifact@v3
       if: success()
       with:
-        name: covmap_windows
+        name: coverage_app
         path: .\dist\coverage_app

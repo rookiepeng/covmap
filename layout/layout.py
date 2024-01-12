@@ -627,130 +627,6 @@ plot_card = dbc.Card(
     style={"border-top-left-radius": "0", "border-top-right-radius": "0"},
 )
 
-roc_card = dbc.Card(
-    [
-        # dbc.CardHeader('NCI Gain Calculator'),
-        dbc.CardBody(
-            [
-                dbc.Row(
-                    [
-                        html.H4("Integration Gain Calculator"),
-                        dbc.Col(
-                            dbc.Row(
-                                [
-                                    dbc.InputGroup(
-                                        [
-                                            dbc.InputGroupText("Pd"),
-                                            dbc.Input(
-                                                id="roc-pd",
-                                                type="number",
-                                                value=0.5,
-                                                min=0.01,
-                                                max=0.9999,
-                                                step=0.0001,
-                                            ),
-                                            dbc.Tooltip(
-                                                "Probability of detection",
-                                                target="roc-pd",
-                                                placement="top",
-                                            ),
-                                        ],
-                                        size="sm",
-                                        className="mb-3",
-                                    ),
-                                    dbc.InputGroup(
-                                        [
-                                            dbc.InputGroupText("Pfa"),
-                                            dbc.Input(
-                                                id="roc-pfa",
-                                                type="number",
-                                                value=0.0001,
-                                                min=0.00000000001,
-                                                max=0.1,
-                                                step=0.00000000001,
-                                            ),
-                                            dbc.Tooltip(
-                                                "Probability of false alarm",
-                                                target="roc-pfa",
-                                                placement="top",
-                                            ),
-                                        ],
-                                        size="sm",
-                                        className="mb-3",
-                                    ),
-                                    dbc.InputGroup(
-                                        [
-                                            dbc.InputGroupText("N"),
-                                            dbc.Input(
-                                                id="roc-n",
-                                                type="number",
-                                                value=12,
-                                                min=1,
-                                                max=1000,
-                                                step=1,
-                                            ),
-                                            dbc.Tooltip(
-                                                "Number of channels",
-                                                target="roc-n",
-                                                placement="top",
-                                            ),
-                                        ],
-                                        size="sm",
-                                        className="mb-3",
-                                    ),
-                                    dbc.InputGroup(
-                                        [
-                                            dbc.InputGroupText("Target"),
-                                            dbc.Select(
-                                                id="roc-integration",
-                                                options=[
-                                                    {"label": i, "value": i}
-                                                    for i in INTEGRATION
-                                                ],
-                                                value="Swerling 3",
-                                            ),
-                                            dbc.Tooltip(
-                                                "Target model",
-                                                target="roc-integration",
-                                                placement="top",
-                                            ),
-                                        ],
-                                        size="sm",
-                                        className="mb-3",
-                                    ),
-                                ]
-                            ),
-                            width=6,
-                        ),
-                        dbc.Col(
-                            dbc.Row(
-                                [
-                                    dbc.Label("Min SNR:", id="roc-minsnr"),
-                                    dbc.Tooltip(
-                                        "Minimal SNR for one channel",
-                                        target="roc-minsnr",
-                                        placement="top",
-                                    ),
-                                    dbc.Label("Gain:", id="roc-gain"),
-                                    dbc.Tooltip(
-                                        "Integration gain",
-                                        target="roc-gain",
-                                        placement="top",
-                                    ),
-                                ]
-                            ),
-                            width=6,
-                        ),
-                    ],
-                    class_name="g-5",
-                )
-            ],
-            class_name="mx-5 my-3",
-        ),
-    ],
-    style={"border-top-left-radius": "0", "border-top-right-radius": "0"},
-)
-
 
 def get_app_layout():
     return dbc.Container(
@@ -760,13 +636,7 @@ def get_app_layout():
             dcc.Store(id="new-figure-data", data=[]),
             dcc.Store(id="sensor-store", data=[], storage_type="local"),
             dcc.Download(id="download"),
-            dbc.Tabs(
-                [
-                    dbc.Tab(plot_card, label="Coverage Map"),
-                    dbc.Tab(roc_card, label="Integration Gain"),
-                ],
-                className="pt-3",
-            ),
+            plot_card,
             html.Hr(),
             dcc.Markdown(
                 "v3.2 | By [Zhengyu Peng](mailto:zhengyu.peng@aptiv.com)",
