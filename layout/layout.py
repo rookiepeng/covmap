@@ -532,10 +532,6 @@ plot_card = dbc.Card(
                                                 ]
                                             ),
                                         ],
-                                        style={
-                                            "overflow-y": "scroll",
-                                            "height": "85vh",
-                                        },
                                     ),
                                 ]
                             ),
