@@ -1,16 +1,18 @@
 """
 
     Copyright (C) 2023 - PRESENT  Zhengyu Peng
-    E-mail: zhengyu.peng@aptiv.com
 
 """
 
+import json
+import os
+import base64
 
 import dash
 from dash.dependencies import Input, Output, State
 from dash import dcc
-from dash import html
 import dash_bootstrap_components as dbc
+from dash.exceptions import PreventUpdate
 
 import numpy as np
 import plotly.io as pio
@@ -18,21 +20,21 @@ import plotly.graph_objects as go
 
 import pandas as pd
 
-from dash.exceptions import PreventUpdate
+from flaskwebgui import FlaskUI
 
 from roc.tools import roc_snr
 
 from layout.layout import get_app_layout
 
-from flaskwebgui import FlaskUI
-
-import json
-import os
-import base64
 
 app = dash.Dash(
     __name__,
-    meta_tags=[{"name": "viewport", "content": "width=device-width,height=device-height,initial-scale=1"}],
+    meta_tags=[
+        {
+            "name": "viewport",
+            "content": "width=device-width,height=device-height,initial-scale=1",
+        }
+    ],
 )
 
 app.scripts.config.serve_locally = True
