@@ -1,7 +1,6 @@
 """
 
     Copyright (C) 2023 - PRESENT  Zhengyu Peng
-    E-mail: zhengyu.peng@aptiv.com
 
 """
 
@@ -624,12 +623,16 @@ plot_card = dbc.Card(
             class_name="mx-3 my-3",
         ),
     ],
-    style={"height":"100vh"},
-    # class_name="pt-2",
+    style={"height": "100vh"},
 )
 
 
 def get_app_layout():
+    """_summary_
+
+    :return: _description_
+    :rtype: _type_
+    """
     return dbc.Container(
         [
             dcc.Store(id="config"),
