@@ -624,8 +624,8 @@ plot_card = dbc.Card(
             class_name="mx-3 my-3",
         ),
     ],
-    style={"border-top-left-radius": "0", "border-top-right-radius": "0"},
-    class_name="mt-3 mb-3",
+    style={"height":"100vh"},
+    # class_name="pt-2",
 )
 
 
