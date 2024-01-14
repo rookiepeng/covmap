@@ -19,7 +19,7 @@ import numpy as np
 import plotly.io as pio
 import plotly.graph_objects as go
 
-import pandas as pd
+import pandas as pds
 
 from flaskwebgui import FlaskUI
 
@@ -670,17 +670,19 @@ def export_data(unused_n_clicks, data, plot_type):
     """
 
     if plot_type == "Azimuth Coverage":
-        dataframe = pd.DataFrame(
+        dataframe = pds.DataFrame(
             {"longitude_m": data[0]["x"], "latitude_m": data[0]["y"]}
         )
     elif plot_type == "Azimuth vs. Range":
-        dataframe = pd.DataFrame({"azimuth_deg": data[0]["x"], "range_m": data[0]["y"]})
+        dataframe = pds.DataFrame(
+            {"azimuth_deg": data[0]["x"], "range_m": data[0]["y"]}
+        )
     elif plot_type == "Elevation Coverage":
-        dataframe = pd.DataFrame(
+        dataframe = pds.DataFrame(
             {"longitude_m": data[0]["x"], "height_m": data[0]["y"]}
         )
     elif plot_type == "Elevation vs. Range":
-        dataframe = pd.DataFrame(
+        dataframe = pds.DataFrame(
             {"elevation_deg": data[0]["x"], "range_m": data[0]["y"]}
         )
 
