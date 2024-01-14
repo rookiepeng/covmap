@@ -9,10 +9,11 @@ import os
 import base64
 
 import dash
-from dash.dependencies import Input, Output, State
 from dash import dcc
-import dash_bootstrap_components as dbc
+from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
+
+import dash_bootstrap_components as dbc
 
 import numpy as np
 import plotly.io as pio
@@ -54,23 +55,23 @@ def load_config(json_file):
     :return: configuration struct
     :rtype: dict
     """
-    with open(json_file, "r") as read_file:
+    with open(json_file, "r", encoding="utf-8") as read_file:
         return json.load(read_file)
 
 
 @app.callback(
-    output=dict(
-        sensor_opts=Output("sensor", "options"),
-        sensor_val=Output("sensor", "value"),
-    ),
-    inputs=dict(
-        btn=Input("reload", "n_clicks"),
-    ),
-    state=dict(
-        sensor_store=State("sensor-store", "data"),
-    ),
+    output={
+        "sensor_opts": Output("sensor", "options"),
+        "sensor_val": Output("sensor", "value"),
+    },
+    inputs={
+        "unused_btn": Input("reload", "n_clicks"),
+    },
+    state={
+        "sensor_store": State("sensor-store", "data"),
+    },
 )
-def reload(btn, sensor_store):
+def reload(unused_btn, sensor_store):
     """
     Callback when reload button clicked
     Only run once when the page is loaded
@@ -82,7 +83,7 @@ def reload(btn, sensor_store):
     """
     radar_list = []
     json_list = []
-    for dirpath, dirnames, files in os.walk("./radar"):
+    for unused_dirpath, unused_dirnames, files in os.walk("./radar"):
         for name in files:
             if name.lower().endswith(".json"):
                 json_list.append(name)
@@ -93,52 +94,67 @@ def reload(btn, sensor_store):
     else:
         sensor_val = radar_list[0]["value"]
 
-    return dict(sensor_opts=radar_list, sensor_val=sensor_val)
+    return {"sensor_opts": radar_list, "sensor_val": sensor_val}
 
 
 @app.callback(
-    output=dict(
-        reload=Output("reload", "n_clicks"),
-        sensor_store=Output("sensor-store", "data", allow_duplicate=True),
-    ),
-    inputs=dict(list_of_contents=Input("upload-config", "contents")),
-    state=dict(
-        list_of_names=State("upload-config", "filename"),
-        list_of_dates=State("upload-config", "last_modified"),
-        n_clicks=State("reload", "n_clicks"),
-    ),
+    output={
+        "reload": Output("reload", "n_clicks"),
+        "sensor_store": Output("sensor-store", "data", allow_duplicate=True),
+    },
+    inputs={"list_of_contents": Input("upload-config", "contents")},
+    state={
+        "list_of_names": State("upload-config", "filename"),
+        "unused_list_of_dates": State("upload-config", "last_modified"),
+        "n_clicks": State("reload", "n_clicks"),
+    },
     prevent_initial_call=True,
 )
-def upload_config(list_of_contents, list_of_names, list_of_dates, n_clicks):
+def upload_config(list_of_contents, list_of_names, unused_list_of_dates, n_clicks):
+    """_summary_
+
+    :param list_of_contents: _description_
+    :type list_of_contents: _type_
+    :param list_of_names: _description_
+    :type list_of_names: _type_
+    :param unused_list_of_dates: _description_
+    :type unused_list_of_dates: _type_
+    :param n_clicks: _description_
+    :type n_clicks: _type_
+    :raises PreventUpdate: _description_
+    :return: _description_
+    :rtype: _type_
+    """
+
     if list_of_contents is None:
         raise PreventUpdate
 
     decoded_str = base64.b64decode(list_of_contents.split("base64,")[1])
     config = json.loads(decoded_str)
 
-    with open("./radar/" + list_of_names, "w") as f:
+    with open("./radar/" + list_of_names, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=4)
 
-    return dict(reload=n_clicks + 1, sensor_store=list_of_names)
+    return {"reload": n_clicks + 1, "sensor_store": list_of_names}
 
 
 @app.callback(
-    output=dict(
-        config=Output("config", "data"),
-        misalign_min=Output("misalign", "min"),
-        misalign_max=Output("misalign", "max"),
-        misalign=Output("misalign", "value"),
-        misalign_input_min=Output("misalign-input", "min"),
-        misalign_input_max=Output("misalign-input", "max"),
-        misalign_input=Output("misalign-input", "value"),
-        sensor_store=Output("sensor-store", "data"),
-    ),
-    inputs=dict(
-        sensor=Input("sensor", "value"),
-    ),
-    state=dict(
-        misalgin_state=State("misalign", "value"),
-    ),
+    output={
+        "config": Output("config", "data"),
+        "misalign_min": Output("misalign", "min"),
+        "misalign_max": Output("misalign", "max"),
+        "misalign": Output("misalign", "value"),
+        "misalign_input_min": Output("misalign-input", "min"),
+        "misalign_input_max": Output("misalign-input", "max"),
+        "misalign_input": Output("misalign-input", "value"),
+        "sensor_store": Output("sensor-store", "data"),
+    },
+    inputs={
+        "sensor": Input("sensor", "value"),
+    },
+    state={
+        "misalgin_state": State("misalign", "value"),
+    },
     prevent_initial_call=True,
 )
 def sensor_select(sensor, misalgin_state):
@@ -154,115 +170,115 @@ def sensor_select(sensor, misalgin_state):
         misalign = 0
     else:
         misalign = misalgin_state
-    return dict(
-        config=config,
-        misalign_min=misalign_min,
-        misalign_max=misalign_max,
-        misalign=misalign,
-        misalign_input_min=misalign_min,
-        misalign_input_max=misalign_max,
-        misalign_input=misalign,
-        sensor_store=sensor,
-    )
+    return {
+        "config": config,
+        "misalign_min": misalign_min,
+        "misalign_max": misalign_max,
+        "misalign": misalign,
+        "misalign_input_min": misalign_min,
+        "misalign_input_max": misalign_max,
+        "misalign_input": misalign,
+        "sensor_store": sensor,
+    }
 
 
 @app.callback(
-    output=dict(
-        fig_data=Output("figure-data", "data", allow_duplicate=True),
-    ),
-    inputs=dict(
-        plot_type=Input("plot", "value"),
-        clear_btn=Input("clear-plot", "n_clicks"),
-    ),
+    output={
+        "fig_data": Output("figure-data", "data", allow_duplicate=True),
+    },
+    inputs={
+        "unused_plot_type": Input("plot", "value"),
+        "unused_clear_btn": Input("clear-plot", "n_clicks"),
+    },
     prevent_initial_call=True,
 )
-def clear_plot(clear_btn, plot_type):
+def clear_plot(unused_clear_btn, unused_plot_type):
     """
     Callback when `Clear plots` button is clicked
 
     """
-    return dict(fig_data=list())
+    return {"fig_data": []}
 
 
 @app.callback(
-    output=dict(
-        fig_data=Output("figure-data", "data", allow_duplicate=True),
-    ),
-    inputs=dict(
-        plot_type=Input("plot", "value"),
-        clear_btn=Input("clear-last-plot", "n_clicks"),
-    ),
-    state=dict(
-        fig_data_input=State("figure-data", "data"),
-    ),
+    output={
+        "fig_data": Output("figure-data", "data", allow_duplicate=True),
+    },
+    inputs={
+        "unused_plot_type": Input("plot", "value"),
+        "unused_clear_btn": Input("clear-last-plot", "n_clicks"),
+    },
+    state={
+        "fig_data_input": State("figure-data", "data"),
+    },
     prevent_initial_call=True,
 )
-def clear_last_plot(clear_btn, plot_type, fig_data_input):
+def clear_last_plot(unused_clear_btn, unused_plot_type, fig_data_input):
     """
     Callback when `Clear plots` button is clicked
 
     """
     if len(fig_data_input) > 0:
         fig_data_input.pop(-1)
-        return dict(fig_data=fig_data_input)
+        return {"fig_data": fig_data_input}
     else:
         raise PreventUpdate
 
 
 @app.callback(
-    output=dict(
-        fig_data=Output("figure-data", "data"),
-    ),
-    inputs=dict(
-        hold_btn=Input("hold-plot", "n_clicks"),
-    ),
-    state=dict(
-        current_figs=State("figure-data", "data"),
-        new_fig=State("new-figure-data", "data"),
-    ),
+    output={
+        "fig_data": Output("figure-data", "data"),
+    },
+    inputs={
+        "unused_hold_btn": Input("hold-plot", "n_clicks"),
+    },
+    state={
+        "current_figs": State("figure-data", "data"),
+        "new_fig": State("new-figure-data", "data"),
+    },
     prevent_initial_call=True,
 )
-def hold_plot(hold_btn, current_figs, new_fig):
+def hold_plot(unused_hold_btn, current_figs, new_fig):
     """
     Callback when `Hold plot` button is clicked
 
     """
-    return dict(fig_data=current_figs + new_fig)
+    return {"fig_data": current_figs + new_fig}
 
 
 @app.callback(
-    output=dict(
-        fig=Output("scatter", "figure"),
-        new_fig=Output("new-figure-data", "data"),
-        property_container=Output("property-container", "children"),
-        legend_entry=Output("legend", "value"),
-    ),
-    inputs=dict(
-        pd=Input("pd", "value"),
-        pfa=Input("pfa", "value"),
-        rcs=Input("rcs-input", "value"),
-        fascia_loss=Input("fascia-input", "value"),
-        mfg_loss=Input("mfg-input", "value"),
-        temp_loss=Input("temp-input", "value"),
-        rain_loss=Input("rain-input", "value"),
-        vert_misalign_angle=Input("misalign-input", "value"),
-        az_offset=Input("az-offset-input", "value"),
-        sw_model=Input("integration", "value"),
-        plot_type=Input("plot", "value"),
-        fig_data=Input("figure-data", "data"),
-        new_legend_entry=Input("legend", "value"),
-        flip=Input("flip-checklist", "value"),
-        long_offset=Input("long-input", "value"),
-        lat_offset=Input("lat-input", "value"),
-        height_offset=Input("height-input", "value"),
-        config=Input("config", "data"),
-    ),
-    state=dict(
-        min_pd=State("pd", "min"),
-        max_pd=State("pd", "max"),
-        min_pfa=State("pfa", "min"),
-        max_pfa=State("pfa", "max"),
-    ),
+    output={
+        "fig": Output("scatter", "figure"),
+        "new_fig": Output("new-figure-data", "data"),
+        "property_container": Output("property-container", "children"),
+        "legend_entry": Output("legend", "value"),
+    },
+    inputs={
+        "pd": Input("pd", "value"),
+        "pfa": Input("pfa", "value"),
+        "rcs": Input("rcs-input", "value"),
+        "fascia_loss": Input("fascia-input", "value"),
+        "mfg_loss": Input("mfg-input", "value"),
+        "temp_loss": Input("temp-input", "value"),
+        "rain_loss": Input("rain-input", "value"),
+        "vert_misalign_angle": Input("misalign-input", "value"),
+        "az_offset": Input("az-offset-input", "value"),
+        "sw_model": Input("integration", "value"),
+        "plot_type": Input("plot", "value"),
+        "fig_data": Input("figure-data", "data"),
+        "new_legend_entry": Input("legend", "value"),
+        "flip": Input("flip-checklist", "value"),
+        "long_offset": Input("long-input", "value"),
+        "lat_offset": Input("lat-input", "value"),
+        "height_offset": Input("height-input", "value"),
+        "config": Input("config", "data"),
+    },
+    state={
+        "min_pd": State("pd", "min"),
+        "max_pd": State("pd", "max"),
+        "min_pfa": State("pfa", "min"),
+        "max_pfa": State("pfa", "max"),
+    },
     prevent_initial_call=True,
 )
 def coverage_plot(
@@ -295,12 +311,12 @@ def coverage_plot(
     """
     if pd is None:
         raise PreventUpdate
-    elif pd < min_pd or pd > max_pd:
+    if pd < min_pd or pd > max_pd:
         raise PreventUpdate
 
     if pfa is None:
         raise PreventUpdate
-    elif pfa < min_pfa or pfa > max_pfa:
+    if pfa < min_pfa or pfa > max_pfa:
         raise PreventUpdate
 
     if rcs is None:
@@ -441,7 +457,7 @@ def coverage_plot(
 
     # clear all the held plots if the plot type is changed
     if trigger_id == "plot":
-        fig_data = list()
+        fig_data = []
 
     if plot_type == "Azimuth Coverage":
         coverage = max_range * 10 ** (az_ptn / 40) * el_missalign_loss_linear
@@ -461,12 +477,12 @@ def coverage_plot(
                 "name": legend,
             }
         ]
-        fig_layout = dict(
-            template=pio.templates["seaborn"],
-            margin=dict(l=20, r=5, t=30, b=20),
-            xaxis=dict(title="Longitude (m)"),
-            yaxis=dict(title="Latitude (m)", scaleanchor="x", scaleratio=1),
-        )
+        fig_layout = {
+            "template": pio.templates["seaborn"],
+            "margin": {"l": 20, "r": 5, "t": 30, "b": 20},
+            "xaxis": {"title": "Longitude (m)"},
+            "yaxis": {"title": "Latitude (m)", "scaleanchor": "x", "scaleratio": 1},
+        }
     elif plot_type == "Azimuth vs. Range":
         coverage = max_range * 10 ** (az_ptn / 40) * el_missalign_loss_linear
         new_fig = [
@@ -479,12 +495,12 @@ def coverage_plot(
                 "name": legend,
             }
         ]
-        fig_layout = dict(
-            template=pio.templates["seaborn"],
-            margin=dict(l=20, r=5, t=30, b=20),
-            xaxis=dict(title="Azimuth (deg)"),
-            yaxis=dict(title="Range (m)"),
-        )
+        fig_layout = {
+            "template": pio.templates["seaborn"],
+            "margin": {"l": 20, "r": 5, "t": 30, "b": 20},
+            "xaxis": {"title": "Azimuth (deg)"},
+            "yaxis": {"title": "Range (m)"},
+        }
     elif plot_type == "Elevation Coverage":
         coverage = max_range * 10 ** (el_ptn / 40) * az_offset_loss_linear
         coverage_long = (
@@ -505,12 +521,12 @@ def coverage_plot(
                 "name": legend,
             }
         ]
-        fig_layout = dict(
-            template=pio.templates["seaborn"],
-            margin=dict(l=20, r=5, t=30, b=20),
-            xaxis=dict(title="Longitude (m)"),
-            yaxis=dict(title="Height (m)", scaleanchor="x", scaleratio=1),
-        )
+        fig_layout = {
+            "template": pio.templates["seaborn"],
+            "margin": {"l": 20, "r": 5, "t": 30, "b": 20},
+            "xaxis": {"title": "Longitude (m)"},
+            "yaxis": {"title": "Height (m)", "scaleanchor": "x", "scaleratio": 1},
+        }
     elif plot_type == "Elevation vs. Range":
         coverage = max_range * 10 ** (el_ptn / 40) * az_offset_loss_linear
         new_fig = [
@@ -523,12 +539,12 @@ def coverage_plot(
                 "name": legend,
             }
         ]
-        fig_layout = dict(
-            template=pio.templates["seaborn"],
-            margin=dict(l=20, r=5, t=30, b=20),
-            xaxis=dict(title="Elevation (deg)"),
-            yaxis=dict(title="Range (m)"),
-        )
+        fig_layout = {
+            "template": pio.templates["seaborn"],
+            "margin": {"l": 20, "r": 5, "t": 30, "b": 20},
+            "xaxis": {"title": "Elevation (deg)"},
+            "yaxis": {"title": "Range (m)"},
+        }
 
     container = []
 
@@ -567,15 +583,15 @@ def coverage_plot(
         )
     )
 
-    return dict(
-        fig={
+    return {
+        "fig": {
             "data": fig_data + new_fig,
             "layout": fig_layout,
         },
-        new_fig=new_fig,
-        property_container=container,
-        legend_entry=legend,
-    )
+        "new_fig": new_fig,
+        "property_container": container,
+        "legend_entry": legend,
+    }
 
 
 @app.callback(
@@ -584,7 +600,7 @@ def coverage_plot(
     State("scatter", "figure"),
     prevent_initial_call=True,
 )
-def export_png(n_clicks, fig):
+def export_png(unused_n_clicks, fig):
     """
     Export the current figure as the .png file
 
@@ -604,7 +620,7 @@ def export_png(n_clicks, fig):
     State("scatter", "figure"),
     prevent_initial_call=True,
 )
-def export_svg(n_clicks, fig):
+def export_svg(unused_n_clicks, fig):
     """
     Export the current figure as the .svg file
 
@@ -624,7 +640,7 @@ def export_svg(n_clicks, fig):
     State("scatter", "figure"),
     prevent_initial_call=True,
 )
-def export_html(n_clicks, fig):
+def export_html(unused_n_clicks, fig):
     """
     Export the current figure as the .html file
 
@@ -647,7 +663,7 @@ def export_html(n_clicks, fig):
     ],
     prevent_initial_call=True,
 )
-def export_data(n_clicks, data, plot_type):
+def export_data(unused_n_clicks, data, plot_type):
     """
     Export the raw data as the .csv file
 
@@ -655,14 +671,18 @@ def export_data(n_clicks, data, plot_type):
 
     if plot_type == "Azimuth Coverage":
         dataframe = pd.DataFrame(
-            dict(longitude_m=data[0]["x"], latitude_m=data[0]["y"])
+            {"longitude_m": data[0]["x"], "latitude_m": data[0]["y"]}
         )
     elif plot_type == "Azimuth vs. Range":
-        dataframe = pd.DataFrame(dict(azimuth_deg=data[0]["x"], range_m=data[0]["y"]))
+        dataframe = pd.DataFrame({"azimuth_deg": data[0]["x"], "range_m": data[0]["y"]})
     elif plot_type == "Elevation Coverage":
-        dataframe = pd.DataFrame(dict(longitude_m=data[0]["x"], height_m=data[0]["y"]))
+        dataframe = pd.DataFrame(
+            {"longitude_m": data[0]["x"], "height_m": data[0]["y"]}
+        )
     elif plot_type == "Elevation vs. Range":
-        dataframe = pd.DataFrame(dict(elevation_deg=data[0]["x"], range_m=data[0]["y"]))
+        dataframe = pd.DataFrame(
+            {"elevation_deg": data[0]["x"], "range_m": data[0]["y"]}
+        )
 
     if not os.path.exists("temp"):
         os.mkdir("temp")
@@ -677,6 +697,16 @@ def export_data(n_clicks, data, plot_type):
     Input("rcs", "value"),
 )
 def link_rcs(rcs_input, rcs_slider):
+    """_summary_
+
+    :param rcs_input: _description_
+    :type rcs_input: _type_
+    :param rcs_slider: _description_
+    :type rcs_slider: _type_
+    :raises PreventUpdate: _description_
+    :return: _description_
+    :rtype: _type_
+    """
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
@@ -694,6 +724,16 @@ def link_rcs(rcs_input, rcs_slider):
     Input("fascia", "value"),
 )
 def link_fascia(fascia_input, fascia_slider):
+    """_summary_
+
+    :param fascia_input: _description_
+    :type fascia_input: _type_
+    :param fascia_slider: _description_
+    :type fascia_slider: _type_
+    :raises PreventUpdate: _description_
+    :return: _description_
+    :rtype: _type_
+    """
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
@@ -711,6 +751,16 @@ def link_fascia(fascia_input, fascia_slider):
     Input("mfg", "value"),
 )
 def link_mfg(mfg_input, mfg_slider):
+    """_summary_
+
+    :param mfg_input: _description_
+    :type mfg_input: _type_
+    :param mfg_slider: _description_
+    :type mfg_slider: _type_
+    :raises PreventUpdate: _description_
+    :return: _description_
+    :rtype: _type_
+    """
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
@@ -728,6 +778,16 @@ def link_mfg(mfg_input, mfg_slider):
     Input("temp", "value"),
 )
 def link_temp(temp_input, temp_slider):
+    """_summary_
+
+    :param temp_input: _description_
+    :type temp_input: _type_
+    :param temp_slider: _description_
+    :type temp_slider: _type_
+    :raises PreventUpdate: _description_
+    :return: _description_
+    :rtype: _type_
+    """
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
@@ -745,6 +805,16 @@ def link_temp(temp_input, temp_slider):
     Input("rain", "value"),
 )
 def link_rain(rain_input, rain_slider):
+    """_summary_
+
+    :param rain_input: _description_
+    :type rain_input: _type_
+    :param rain_slider: _description_
+    :type rain_slider: _type_
+    :raises PreventUpdate: _description_
+    :return: _description_
+    :rtype: _type_
+    """
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
@@ -763,6 +833,16 @@ def link_rain(rain_input, rain_slider):
     prevent_initial_call=True,
 )
 def link_misalign(misalign_input, misalign_slider):
+    """_summary_
+
+    :param misalign_input: _description_
+    :type misalign_input: _type_
+    :param misalign_slider: _description_
+    :type misalign_slider: _type_
+    :raises PreventUpdate: _description_
+    :return: _description_
+    :rtype: _type_
+    """
     ctx = dash.callback_context
     tri_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
@@ -780,6 +860,16 @@ def link_misalign(misalign_input, misalign_slider):
     Input("az-offset", "value"),
 )
 def link_azoffset(azoffset_input, az_slider):
+    """_summary_
+
+    :param azoffset_input: _description_
+    :type azoffset_input: _type_
+    :param az_slider: _description_
+    :type az_slider: _type_
+    :raises PreventUpdate: _description_
+    :return: _description_
+    :rtype: _type_
+    """
     ctx = dash.callback_context
     tri_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
@@ -797,6 +887,16 @@ def link_azoffset(azoffset_input, az_slider):
     Input("long", "value"),
 )
 def link_long(long_input, long_slider):
+    """_summary_
+
+    :param long_input: _description_
+    :type long_input: _type_
+    :param long_slider: _description_
+    :type long_slider: _type_
+    :raises PreventUpdate: _description_
+    :return: _description_
+    :rtype: _type_
+    """
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
@@ -814,6 +914,16 @@ def link_long(long_input, long_slider):
     Input("lat", "value"),
 )
 def link_lat(lat_input, lat_slider):
+    """_summary_
+
+    :param lat_input: _description_
+    :type lat_input: _type_
+    :param lat_slider: _description_
+    :type lat_slider: _type_
+    :raises PreventUpdate: _description_
+    :return: _description_
+    :rtype: _type_
+    """
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
@@ -831,6 +941,16 @@ def link_lat(lat_input, lat_slider):
     Input("height", "value"),
 )
 def link_height(height_input, height_slider):
+    """_summary_
+
+    :param height_input: _description_
+    :type height_input: _type_
+    :param height_slider: _description_
+    :type height_slider: _type_
+    :raises PreventUpdate: _description_
+    :return: _description_
+    :rtype: _type_
+    """
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
