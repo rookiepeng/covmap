@@ -177,7 +177,8 @@ def sensor_select(sensor, misalgin_state):
     - misalgin_state (float): The current misalignment state.
 
     Returns:
-    - dict: A dictionary containing the sensor configuration, misalignment range and state, and other relevant information.
+    - dict: A dictionary containing the sensor configuration,
+        misalignment range and state, and other relevant information.
 
     Example Usage:
     result = sensor_select("sensor1.json", 0.5)
@@ -296,7 +297,8 @@ def hold_plot(unused_hold_btn, current_figs, new_fig):
     - dict: A dictionary containing the updated "fig_data" list after adding the new plot.
 
     Example Usage:
-    result = hold_plot("unused", [{"x": [1, 2, 3], "y": [4, 5, 6]}], [{"x": [7, 8, 9], "y": [10, 11, 12]}])
+    result = hold_plot("unused", [{"x": [1, 2, 3], "y": [4, 5, 6]}],
+        [{"x": [7, 8, 9], "y": [10, 11, 12]}])
     """
 
     return {"fig_data": current_figs + new_fig}
@@ -389,7 +391,8 @@ def coverage_plot(
     - config (dict): Sensor configuration.
 
     Returns:
-    - dict: A dictionary containing the updated figure, new figure data, property container, and legend entry.
+    - dict: A dictionary containing the updated figure, new figure data,
+        property container, and legend entry.
 
     Raises:
     - PreventUpdate: If any of the required inputs are None or outside the specified range.
