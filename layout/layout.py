@@ -1,7 +1,5 @@
 """
-
     Copyright (C) 2023 - PRESENT  Zhengyu Peng
-
 """
 
 from dash import dcc
@@ -628,11 +626,16 @@ plot_card = dbc.Card(
 
 
 def get_app_layout():
-    """_summary_
-
-    :return: _description_
-    :rtype: _type_
     """
+    Define the layout for the Dash application.
+
+    Returns:
+    - dbc.Container: The container element that holds the layout of the application.
+
+    Example Usage:
+    result = get_app_layout()
+    """
+
     return dbc.Container(
         [
             dcc.Store(id="config"),

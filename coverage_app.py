@@ -1,7 +1,5 @@
 """
-
     Copyright (C) 2023 - PRESENT  Zhengyu Peng
-
 """
 
 import json
@@ -47,14 +45,18 @@ server = app.server
 
 def load_config(json_file):
     """
-    Load config json file
+    Load configuration from a JSON file.
 
-    :param str json_file
-        json file path
+    Parameters:
+    - json_file (str): The path to the JSON file.
 
-    :return: configuration struct
-    :rtype: dict
+    Returns:
+    - dict: The loaded configuration as a dictionary.
+
+    Example Usage:
+    config = load_config("config.json")
     """
+
     with open(json_file, "r", encoding="utf-8") as read_file:
         return json.load(read_file)
 
@@ -73,14 +75,19 @@ def load_config(json_file):
 )
 def reload(unused_btn, sensor_store):
     """
-    Callback when reload button clicked
-    Only run once when the page is loaded
+    Reload sensor options and values.
 
-    Scan the json files under `radar` folder
+    Parameters:
+    - unused_btn: Unused parameter, can be any value.
+    - sensor_store (str): The current sensor value.
 
-    :param btn button click count
-    :param sensor_store local stored selection
+    Returns:
+    - dict: A dictionary containing updated sensor options and values.
+
+    Example Usage:
+    result = reload("unused", "sensor1.json")
     """
+
     radar_list = []
     json_list = []
     for unused_dirpath, unused_dirnames, files in os.walk("./radar"):
@@ -111,19 +118,23 @@ def reload(unused_btn, sensor_store):
     prevent_initial_call=True,
 )
 def upload_config(list_of_contents, list_of_names, unused_list_of_dates, n_clicks):
-    """_summary_
+    """
+    Upload and save a configuration file.
 
-    :param list_of_contents: _description_
-    :type list_of_contents: _type_
-    :param list_of_names: _description_
-    :type list_of_names: _type_
-    :param unused_list_of_dates: _description_
-    :type unused_list_of_dates: _type_
-    :param n_clicks: _description_
-    :type n_clicks: _type_
-    :raises PreventUpdate: _description_
-    :return: _description_
-    :rtype: _type_
+    Parameters:
+    - list_of_contents (str): The base64-encoded contents of the file.
+    - list_of_names (str): The name of the file.
+    - unused_list_of_dates: Unused parameter, can be any value.
+    - n_clicks (int): The number of times the upload button has been clicked.
+
+    Returns:
+    - dict: A dictionary containing the updated "reload" value and the "sensor_store" value.
+
+    Raises:
+    - PreventUpdate: If the list_of_contents is None.
+
+    Example Usage:
+    result = upload_config("base64-encoded-contents", "config.json", "unused", 3)
     """
 
     if list_of_contents is None:
@@ -159,9 +170,19 @@ def upload_config(list_of_contents, list_of_names, unused_list_of_dates, n_click
 )
 def sensor_select(sensor, misalgin_state):
     """
-    Callback when a sensor is selected
+    Select and configure a sensor.
 
+    Parameters:
+    - sensor (str): The name of the sensor configuration file.
+    - misalgin_state (float): The current misalignment state.
+
+    Returns:
+    - dict: A dictionary containing the sensor configuration, misalignment range and state, and other relevant information.
+
+    Example Usage:
+    result = sensor_select("sensor1.json", 0.5)
     """
+
     config = load_config("./radar/" + sensor)
     misalign_min = config["el_fov"][0]
     misalign_max = config["el_fov"][1]
@@ -194,9 +215,19 @@ def sensor_select(sensor, misalgin_state):
 )
 def clear_plot(unused_clear_btn, unused_plot_type):
     """
-    Callback when `Clear plots` button is clicked
+    Clear the plot.
 
+    Parameters:
+    - unused_clear_btn: Unused parameter, can be any value.
+    - unused_plot_type: Unused parameter, can be any value.
+
+    Returns:
+    - dict: A dictionary containing an empty list for "fig_data".
+
+    Example Usage:
+    result = clear_plot("unused", "unused")
     """
+
     return {"fig_data": []}
 
 
@@ -215,9 +246,23 @@ def clear_plot(unused_clear_btn, unused_plot_type):
 )
 def clear_last_plot(unused_clear_btn, unused_plot_type, fig_data_input):
     """
-    Callback when `Clear plots` button is clicked
+    Clear the last plot.
 
+    Parameters:
+    - unused_clear_btn: Unused parameter, can be any value.
+    - unused_plot_type: Unused parameter, can be any value.
+    - fig_data_input (list): The input list of figure data.
+
+    Returns:
+    - dict: A dictionary containing the updated "fig_data" list after removing the last plot.
+
+    Raises:
+    - PreventUpdate: If the fig_data_input list is empty.
+
+    Example Usage:
+    result = clear_last_plot("unused", "unused", [{"x": [1, 2, 3], "y": [4, 5, 6]}])
     """
+
     if len(fig_data_input) > 0:
         fig_data_input.pop(-1)
         return {"fig_data": fig_data_input}
@@ -240,9 +285,20 @@ def clear_last_plot(unused_clear_btn, unused_plot_type, fig_data_input):
 )
 def hold_plot(unused_hold_btn, current_figs, new_fig):
     """
-    Callback when `Hold plot` button is clicked
+    Hold and add a new plot.
 
+    Parameters:
+    - unused_hold_btn: Unused parameter, can be any value.
+    - current_figs (list): The current list of figure data.
+    - new_fig (list): The new figure data to be added.
+
+    Returns:
+    - dict: A dictionary containing the updated "fig_data" list after adding the new plot.
+
+    Example Usage:
+    result = hold_plot("unused", [{"x": [1, 2, 3], "y": [4, 5, 6]}], [{"x": [7, 8, 9], "y": [10, 11, 12]}])
     """
+
     return {"fig_data": current_figs + new_fig}
 
 
@@ -306,9 +362,65 @@ def coverage_plot(
     config,
 ):
     """
-    Plot the coverage map
+    Plot the coverage map.
 
+    Parameters:
+    - pd (float): Probability of Detection.
+    - pfa (float): Probability of False Alarm.
+    - rcs (float): Radar Cross Section.
+    - fascia_loss (float): Fascia Loss.
+    - mfg_loss (float): Manufacturing Loss.
+    - temp_loss (float): Temperature Loss.
+    - rain_loss (float): Rain Loss.
+    - vert_misalign_angle (float): Vertical Misalignment Angle.
+    - az_offset (float): Azimuth Offset.
+    - sw_model (str): Software Model.
+    - plot_type (str): Type of plot to generate.
+    - new_legend_entry (str): New legend entry for the plot.
+    - min_pd (float): Minimum Probability of Detection.
+    - max_pd (float): Maximum Probability of Detection.
+    - min_pfa (float): Minimum Probability of False Alarm.
+    - max_pfa (float): Maximum Probability of False Alarm.
+    - fig_data (list): Existing figure data.
+    - flip (list): List of flip options.
+    - long_offset (float): Longitude offset.
+    - lat_offset (float): Latitude offset.
+    - height_offset (float): Height offset.
+    - config (dict): Sensor configuration.
+
+    Returns:
+    - dict: A dictionary containing the updated figure, new figure data, property container, and legend entry.
+
+    Raises:
+    - PreventUpdate: If any of the required inputs are None or outside the specified range.
+
+    Example Usage:
+    result = coverage_plot(
+        0.9,
+        1e-5,
+        -30,
+        1,
+        -1,
+        -2,
+        -3,
+        0,
+        0,
+        "Model A",
+        "Azimuth Coverage",
+        "New Entry",
+        0.8,
+        0.95,
+        1e-6,
+        1e-4,
+        [],
+        ["flip_az"],
+        0,
+        0,
+        0,
+        config
+    )
     """
+
     if pd is None:
         raise PreventUpdate
     if pd < min_pd or pd > max_pd:
@@ -602,9 +714,19 @@ def coverage_plot(
 )
 def export_png(unused_n_clicks, fig):
     """
-    Export the current figure as the .png file
+    Export the current figure as a PNG file.
 
+    Parameters:
+    - unused_n_clicks: Unused parameter, can be any value.
+    - fig: The figure object to be exported.
+
+    Returns:
+    - dcc.send_file: Sends the exported PNG file to the user for download.
+
+    Example Usage:
+    result = export_png("unused", fig)
     """
+
     figure = go.Figure(fig)
 
     if not os.path.exists("temp"):
@@ -622,9 +744,19 @@ def export_png(unused_n_clicks, fig):
 )
 def export_svg(unused_n_clicks, fig):
     """
-    Export the current figure as the .svg file
+    Export the current figure as an SVG file.
 
+    Parameters:
+    - unused_n_clicks: Unused parameter, can be any value.
+    - fig: The figure object to be exported.
+
+    Returns:
+    - dcc.send_file: Sends the exported SVG file to the user for download.
+
+    Example Usage:
+    result = export_svg("unused", fig)
     """
+
     figure = go.Figure(fig)
 
     if not os.path.exists("temp"):
@@ -642,9 +774,19 @@ def export_svg(unused_n_clicks, fig):
 )
 def export_html(unused_n_clicks, fig):
     """
-    Export the current figure as the .html file
+    Export the current figure as an HTML file.
 
+    Parameters:
+    - unused_n_clicks: Unused parameter, can be any value.
+    - fig: The figure object to be exported.
+
+    Returns:
+    - dcc.send_file: Sends the exported HTML file to the user for download.
+
+    Example Usage:
+    result = export_html("unused", fig)
     """
+
     figure = go.Figure(fig)
 
     if not os.path.exists("temp"):
@@ -665,8 +807,18 @@ def export_html(unused_n_clicks, fig):
 )
 def export_data(unused_n_clicks, data, plot_type):
     """
-    Export the raw data as the .csv file
+    Export the raw data as a CSV file.
 
+    Parameters:
+    - unused_n_clicks: Unused parameter, can be any value.
+    - data: The data to be exported.
+    - plot_type: The type of plot associated with the data.
+
+    Returns:
+    - dcc.send_data_frame: Sends the exported CSV file to the user for download.
+
+    Example Usage:
+    result = export_data("unused", data, "Azimuth Coverage")
     """
 
     if plot_type == "Azimuth Coverage":
@@ -699,16 +851,23 @@ def export_data(unused_n_clicks, data, plot_type):
     Input("rcs", "value"),
 )
 def link_rcs(rcs_input, rcs_slider):
-    """_summary_
-
-    :param rcs_input: _description_
-    :type rcs_input: _type_
-    :param rcs_slider: _description_
-    :type rcs_slider: _type_
-    :raises PreventUpdate: _description_
-    :return: _description_
-    :rtype: _type_
     """
+    Link the RCS input and slider values.
+
+    Parameters:
+    - rcs_input: The input value of RCS.
+    - rcs_slider: The value of RCS selected using a slider.
+
+    Returns:
+    - tuple: A tuple containing the linked values for RCS.
+
+    Raises:
+    - PreventUpdate: If the RCS input value is None.
+
+    Example Usage:
+    result = link_rcs(10, None)
+    """
+
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
@@ -726,16 +885,23 @@ def link_rcs(rcs_input, rcs_slider):
     Input("fascia", "value"),
 )
 def link_fascia(fascia_input, fascia_slider):
-    """_summary_
-
-    :param fascia_input: _description_
-    :type fascia_input: _type_
-    :param fascia_slider: _description_
-    :type fascia_slider: _type_
-    :raises PreventUpdate: _description_
-    :return: _description_
-    :rtype: _type_
     """
+    Link the Fascia input and slider values.
+
+    Parameters:
+    - fascia_input: The input value of Fascia.
+    - fascia_slider: The value of Fascia selected using a slider.
+
+    Returns:
+    - tuple: A tuple containing the linked values for Fascia.
+
+    Raises:
+    - PreventUpdate: If the Fascia input value is None.
+
+    Example Usage:
+    result = link_fascia(1, None)
+    """
+
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
@@ -753,16 +919,23 @@ def link_fascia(fascia_input, fascia_slider):
     Input("mfg", "value"),
 )
 def link_mfg(mfg_input, mfg_slider):
-    """_summary_
-
-    :param mfg_input: _description_
-    :type mfg_input: _type_
-    :param mfg_slider: _description_
-    :type mfg_slider: _type_
-    :raises PreventUpdate: _description_
-    :return: _description_
-    :rtype: _type_
     """
+    Link the Manufacturing Loss input and slider values.
+
+    Parameters:
+    - mfg_input: The input value of Manufacturing Loss.
+    - mfg_slider: The value of Manufacturing Loss selected using a slider.
+
+    Returns:
+    - tuple: A tuple containing the linked values for Manufacturing Loss.
+
+    Raises:
+    - PreventUpdate: If the Manufacturing Loss input value is None.
+
+    Example Usage:
+    result = link_mfg(2, None)
+    """
+
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
@@ -780,16 +953,23 @@ def link_mfg(mfg_input, mfg_slider):
     Input("temp", "value"),
 )
 def link_temp(temp_input, temp_slider):
-    """_summary_
-
-    :param temp_input: _description_
-    :type temp_input: _type_
-    :param temp_slider: _description_
-    :type temp_slider: _type_
-    :raises PreventUpdate: _description_
-    :return: _description_
-    :rtype: _type_
     """
+    Link the Temperature Loss input and slider values.
+
+    Parameters:
+    - temp_input: The input value of Temperature Loss.
+    - temp_slider: The value of Temperature Loss selected using a slider.
+
+    Returns:
+    - tuple: A tuple containing the linked values for Temperature Loss.
+
+    Raises:
+    - PreventUpdate: If the Temperature Loss input value is None.
+
+    Example Usage:
+    result = link_temp(-3, None)
+    """
+
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
@@ -807,16 +987,23 @@ def link_temp(temp_input, temp_slider):
     Input("rain", "value"),
 )
 def link_rain(rain_input, rain_slider):
-    """_summary_
-
-    :param rain_input: _description_
-    :type rain_input: _type_
-    :param rain_slider: _description_
-    :type rain_slider: _type_
-    :raises PreventUpdate: _description_
-    :return: _description_
-    :rtype: _type_
     """
+    Link the Rain Loss input and slider values.
+
+    Parameters:
+    - rain_input: The input value of Rain Loss.
+    - rain_slider: The value of Rain Loss selected using a slider.
+
+    Returns:
+    - tuple: A tuple containing the linked values for Rain Loss.
+
+    Raises:
+    - PreventUpdate: If the Rain Loss input value is None.
+
+    Example Usage:
+    result = link_rain(-3, None)
+    """
+
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
@@ -835,16 +1022,23 @@ def link_rain(rain_input, rain_slider):
     prevent_initial_call=True,
 )
 def link_misalign(misalign_input, misalign_slider):
-    """_summary_
-
-    :param misalign_input: _description_
-    :type misalign_input: _type_
-    :param misalign_slider: _description_
-    :type misalign_slider: _type_
-    :raises PreventUpdate: _description_
-    :return: _description_
-    :rtype: _type_
     """
+    Link the Vertical Misalignment Angle input and slider values.
+
+    Parameters:
+    - misalign_input: The input value of Vertical Misalignment Angle.
+    - misalign_slider: The value of Vertical Misalignment Angle selected using a slider.
+
+    Returns:
+    - tuple: A tuple containing the linked values for Vertical Misalignment Angle.
+
+    Raises:
+    - PreventUpdate: If the Vertical Misalignment Angle input value is None.
+
+    Example Usage:
+    result = link_misalign(0, None)
+    """
+
     ctx = dash.callback_context
     tri_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
@@ -862,16 +1056,23 @@ def link_misalign(misalign_input, misalign_slider):
     Input("az-offset", "value"),
 )
 def link_azoffset(azoffset_input, az_slider):
-    """_summary_
-
-    :param azoffset_input: _description_
-    :type azoffset_input: _type_
-    :param az_slider: _description_
-    :type az_slider: _type_
-    :raises PreventUpdate: _description_
-    :return: _description_
-    :rtype: _type_
     """
+    Link the Azimuth Offset input and slider values.
+
+    Parameters:
+    - azoffset_input: The input value of Azimuth Offset.
+    - az_slider: The value of Azimuth Offset selected using a slider.
+
+    Returns:
+    - tuple: A tuple containing the linked values for Azimuth Offset.
+
+    Raises:
+    - PreventUpdate: If the Azimuth Offset input value is None.
+
+    Example Usage:
+    result = link_azoffset(0, None)
+    """
+
     ctx = dash.callback_context
     tri_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
@@ -889,16 +1090,23 @@ def link_azoffset(azoffset_input, az_slider):
     Input("long", "value"),
 )
 def link_long(long_input, long_slider):
-    """_summary_
-
-    :param long_input: _description_
-    :type long_input: _type_
-    :param long_slider: _description_
-    :type long_slider: _type_
-    :raises PreventUpdate: _description_
-    :return: _description_
-    :rtype: _type_
     """
+    Link the Longitude Offset input and slider values.
+
+    Parameters:
+    - long_input: The input value of Longitude Offset.
+    - long_slider: The value of Longitude Offset selected using a slider.
+
+    Returns:
+    - tuple: A tuple containing the linked values for Longitude Offset.
+
+    Raises:
+    - PreventUpdate: If the Longitude Offset input value is None.
+
+    Example Usage:
+    result = link_long(0, None)
+    """
+
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
@@ -916,16 +1124,23 @@ def link_long(long_input, long_slider):
     Input("lat", "value"),
 )
 def link_lat(lat_input, lat_slider):
-    """_summary_
-
-    :param lat_input: _description_
-    :type lat_input: _type_
-    :param lat_slider: _description_
-    :type lat_slider: _type_
-    :raises PreventUpdate: _description_
-    :return: _description_
-    :rtype: _type_
     """
+    Link the Latitude Offset input and slider values.
+
+    Parameters:
+    - lat_input: The input value of Latitude Offset.
+    - lat_slider: The value of Latitude Offset selected using a slider.
+
+    Returns:
+    - tuple: A tuple containing the linked values for Latitude Offset.
+
+    Raises:
+    - PreventUpdate: If the Latitude Offset input value is None.
+
+    Example Usage:
+    result = link_lat(0, None)
+    """
+
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
@@ -943,16 +1158,23 @@ def link_lat(lat_input, lat_slider):
     Input("height", "value"),
 )
 def link_height(height_input, height_slider):
-    """_summary_
-
-    :param height_input: _description_
-    :type height_input: _type_
-    :param height_slider: _description_
-    :type height_slider: _type_
-    :raises PreventUpdate: _description_
-    :return: _description_
-    :rtype: _type_
     """
+    Link the Height Offset input and slider values.
+
+    Parameters:
+    - height_input: The input value of Height Offset.
+    - height_slider: The value of Height Offset selected using a slider.
+
+    Returns:
+    - tuple: A tuple containing the linked values for Height Offset.
+
+    Raises:
+    - PreventUpdate: If the Height Offset input value is None.
+
+    Example Usage:
+    result = link_height(0, None)
+    """
+
     ctx = dash.callback_context
     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
 
