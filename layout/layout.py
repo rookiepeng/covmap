@@ -76,7 +76,7 @@ rcs_slider = html.Div(
                 ),
             ],
             size="sm",
-            class_name="mb-1",
+            className="mb-1",
         ),
         dcc.Slider(
             id="rcs",
@@ -108,7 +108,7 @@ fascia_slider = html.Div(
                 ),
             ],
             size="sm",
-            class_name="mb-1",
+            className="mb-1",
         ),
         dcc.Slider(
             id="fascia",
@@ -140,7 +140,7 @@ mfg_slider = html.Div(
                 ),
             ],
             size="sm",
-            class_name="mb-1",
+            className="mb-1",
         ),
         dcc.Slider(
             id="mfg",
@@ -172,7 +172,7 @@ temp_slider = html.Div(
                 ),
             ],
             size="sm",
-            class_name="mb-1",
+            className="mb-1",
         ),
         dcc.Slider(
             id="temp",
@@ -204,7 +204,7 @@ rain_slider = html.Div(
                 ),
             ],
             size="sm",
-            class_name="mb-1",
+            className="mb-1",
         ),
         dcc.Slider(
             id="rain",
@@ -236,7 +236,7 @@ misalign_slider = html.Div(
                 ),
             ],
             size="sm",
-            class_name="mb-1",
+            className="mb-1",
         ),
         dcc.Slider(
             id="misalign",
@@ -273,7 +273,7 @@ az_slider = html.Div(
                 ),
             ],
             size="sm",
-            class_name="mb-1",
+            className="mb-1",
         ),
         dcc.Slider(
             id="az-offset",
@@ -304,7 +304,7 @@ long_slider = html.Div(
                 ),
             ],
             size="sm",
-            class_name="mb-1",
+            className="mb-1",
         ),
         dcc.Slider(
             id="long",
@@ -335,7 +335,7 @@ lat_slider = html.Div(
                 ),
             ],
             size="sm",
-            class_name="mb-1",
+            className="mb-1",
         ),
         dcc.Slider(
             id="lat",
@@ -366,7 +366,7 @@ height_slider = html.Div(
                 ),
             ],
             size="sm",
-            class_name="mb-1",
+            className="mb-1",
         ),
         dcc.Slider(
             id="height",
@@ -393,9 +393,7 @@ plot_card = dbc.Card(
                                     dbc.InputGroup(
                                         [
                                             dbc.Button(
-                                                html.I(
-                                                    class_name="bi bi-record-circle"
-                                                ),
+                                                html.I(className="bi bi-record-circle"),
                                                 id="reload",
                                                 n_clicks=0,
                                                 color="primary",
@@ -410,7 +408,7 @@ plot_card = dbc.Card(
                                             dcc.Upload(
                                                 id="upload-config",
                                                 children=dbc.Button(
-                                                    html.I(class_name="bi bi-upload"),
+                                                    html.I(className="bi bi-upload"),
                                                     color="success",
                                                     style={
                                                         "border-top-left-radius": "0",
@@ -425,7 +423,7 @@ plot_card = dbc.Card(
                                                 placement="top",
                                             ),
                                         ],
-                                        class_name="mb-3",
+                                        className="mb-3",
                                     ),
                                     html.Div(
                                         [
@@ -451,7 +449,7 @@ plot_card = dbc.Card(
                                                     ),
                                                 ],
                                                 size="sm",
-                                                class_name="mb-3",
+                                                className="mb-3",
                                             ),
                                             dbc.InputGroup(
                                                 [
@@ -471,7 +469,7 @@ plot_card = dbc.Card(
                                                     ),
                                                 ],
                                                 size="sm",
-                                                class_name="mb-3",
+                                                className="mb-3",
                                             ),
                                             dbc.InputGroup(
                                                 [
@@ -491,7 +489,7 @@ plot_card = dbc.Card(
                                                     ),
                                                 ],
                                                 size="sm",
-                                                class_name="mb-3",
+                                                className="mb-3",
                                             ),
                                             dbc.InputGroup(
                                                 [
@@ -610,7 +608,7 @@ plot_card = dbc.Card(
                                                 color="info",
                                             ),
                                         ],
-                                        class_name="mt-3",
+                                        className="mt-3",
                                     ),
                                 ]
                             ),
@@ -648,9 +646,9 @@ def get_app_layout():
             # html.Hr(),
             # dcc.Markdown(
             #     "v3.2 | By [Zhengyu Peng](mailto:zhengyu.peng@aptiv.com)",
-            #     class_name="pb-2",
+            #     className="pb-2",
             # ),
         ],
         fluid=True,
-        class_name="dbc_light",
+        className="dbc_light",
     )
