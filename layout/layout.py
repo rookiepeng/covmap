@@ -629,11 +629,10 @@ def get_app_layout():
     """
     Define the layout for the Dash application.
 
-    Returns:
-    - dbc.Container: The container element that holds the layout of the application.
-
-    Example Usage:
-    result = get_app_layout()
+    :return: The container element that holds the layout of the application.
+    :rtype: dbc.Container
+    :example:
+    >>> result = get_app_layout()
     """
 
     return dbc.Container(
