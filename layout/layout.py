@@ -531,7 +531,7 @@ plot_card = dbc.Card(
                                         ],
                                         style={
                                             "overflow-y": "scroll",
-                                            "height": "85vh",
+                                            "height": "80vh",
                                         },
                                     ),
                                 ]
@@ -585,7 +585,7 @@ plot_card = dbc.Card(
                                                 ),
                                             },
                                         },
-                                        style={"height": "75vh"},
+                                        style={"height": "76vh"},
                                     ),
                                     dbc.Col(html.Hr()),
                                     dbc.InputGroup(
@@ -621,7 +621,8 @@ plot_card = dbc.Card(
             class_name="mx-3 my-3",
         ),
     ],
-    style={"height": "100vh"},
+    class_name="mt-2 mb-1",
+    style={"height": "100vh-$spacer"},
 )
 
 
@@ -643,11 +644,11 @@ def get_app_layout():
             dcc.Store(id="sensor-store", data=[], storage_type="local"),
             dcc.Download(id="download"),
             plot_card,
-            # html.Hr(),
-            # dcc.Markdown(
-            #     "v3.2 | By [Zhengyu Peng](mailto:zhengyu.peng@aptiv.com)",
-            #     className="pb-2",
-            # ),
+            html.Hr(),
+            dcc.Markdown(
+                "v3.2 | By [Zhengyu Peng](mailto:zhengyu.peng@aptiv.com)",
+                className="pb-1",
+            ),
         ],
         fluid=True,
         className="dbc_light",
