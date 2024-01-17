@@ -576,7 +576,6 @@ plot_card = dbc.Card(
                                             ],
                                             "layout": {
                                                 "template": pio.templates["plotly"],
-                                                "autosize":True,
                                                 "uirevision": "no_change",
                                                 "xaxis": dict(
                                                     title="Number of Channels"
