@@ -531,7 +531,7 @@ plot_card = dbc.Card(
                                         ],
                                         style={
                                             "overflow-y": "scroll",
-                                            "height": "80vh",
+                                            "height": "82vh",
                                         },
                                     ),
                                 ]
@@ -576,6 +576,7 @@ plot_card = dbc.Card(
                                             ],
                                             "layout": {
                                                 "template": pio.templates["plotly"],
+                                                "autosize":True,
                                                 "uirevision": "no_change",
                                                 "xaxis": dict(
                                                     title="Number of Channels"
@@ -621,8 +622,7 @@ plot_card = dbc.Card(
             class_name="mx-3 my-3",
         ),
     ],
-    class_name="mt-2 mb-1",
-    style={"height": "100vh-$spacer"},
+    class_name="mt-2 mb-2",
 )
 
 
@@ -644,9 +644,9 @@ def get_app_layout():
             dcc.Store(id="sensor-store", data=[], storage_type="local"),
             dcc.Download(id="download"),
             plot_card,
-            html.Hr(),
+            # html.Hr(),
             dcc.Markdown(
-                "v3.2 | By [Zhengyu Peng](mailto:zhengyu.peng@aptiv.com)",
+                "v4.0 | By [Zhengyu Peng](mailto:zhengyu.peng@aptiv.com)",
                 className="pb-1",
             ),
         ],
