@@ -1103,4 +1103,4 @@ def link_height(height_input, height_slider):
 
 if __name__ == "__main__":
     # app.run_server(debug=True, threaded=True, processes=1, host="0.0.0.0")
-    FlaskUI(app=server, server="flask").run()
+    FlaskUI(app=server, server="flask", port=3467).run()
