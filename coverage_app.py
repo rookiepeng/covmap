@@ -1109,5 +1109,5 @@ def run_gui_thread():
 if __name__ == "__main__":
     # app.run_server(debug=True, threaded=True, processes=1, host="0.0.0.0")
 
-    run_thread = Thread(target=run_gui_thread, name="run new gui")
+    run_thread = Thread(target=run_gui_thread, name="coverage app")
     run_thread.start()
