@@ -5,5 +5,6 @@ numpy
 scipy
 plotly
 pandas
+psutil
 waitress
 kaleido==v0.1.0.post1
