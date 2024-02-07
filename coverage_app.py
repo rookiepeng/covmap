@@ -2,7 +2,6 @@
     Copyright (C) 2023 - PRESENT  Zhengyu Peng
 """
 
-from threading import Thread
 import json
 import os
 import base64
@@ -1102,12 +1101,7 @@ def link_height(height_input, height_slider):
     return value, value
 
 
-def run_gui_thread():
-    FlaskUI(app=server, server="flask", port=34687, profile_dir="coverage_app").run()
-
-
 if __name__ == "__main__":
     # app.run_server(debug=True, threaded=True, processes=1, host="0.0.0.0")
 
-    run_thread = Thread(target=run_gui_thread, name="coverage app")
-    run_thread.start()
+    FlaskUI(app=server, server="flask", port=34687, profile_dir="coverage_app").run()
