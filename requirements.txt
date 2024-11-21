@@ -7,4 +7,4 @@ plotly
 pandas
 flaskwebgui
 waitress
-kaleido==v0.1.0.post1
+kaleido
