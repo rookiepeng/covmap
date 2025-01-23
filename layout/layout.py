@@ -645,7 +645,7 @@ def get_app_layout():
             plot_card,
             # html.Hr(),
             dcc.Markdown(
-                "v4.2 | By [Zhengyu Peng](mailto:zhengyu.peng@aptiv.com)",
+                "v4.3 | By [Zhengyu Peng](mailto:zhengyu.peng@aptiv.com)",
                 className="pb-1",
             ),
         ],
