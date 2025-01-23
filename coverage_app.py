@@ -226,7 +226,6 @@ def clear_plot(unused_clear_btn, unused_plot_type):
         "fig_data": Output("figure-data", "data", allow_duplicate=True),
     },
     inputs={
-        "unused_plot_type": Input("plot", "value"),
         "unused_clear_btn": Input("clear-last-plot", "n_clicks"),
     },
     state={
@@ -234,7 +233,7 @@ def clear_plot(unused_clear_btn, unused_plot_type):
     },
     prevent_initial_call=True,
 )
-def clear_last_plot(unused_clear_btn, unused_plot_type, fig_data_input):
+def clear_last_plot(unused_clear_btn, fig_data_input):
     """
     Clear the last plot.
 
