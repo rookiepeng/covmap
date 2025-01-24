@@ -1,5 +1,7 @@
 """
     Copyright (C) 2023 - PRESENT  Zhengyu Peng
+    
+    Coverage Map Application - A tool for visualizing radar coverage patterns.
 """
 
 import json
@@ -25,6 +27,7 @@ from roc.tools import roc_snr
 
 from layout.layout import get_app_layout
 
+from typing import Dict, List, Any, Tuple, Union, Optional
 
 app = dash.Dash(
     __name__,
@@ -43,17 +46,27 @@ app.layout = get_app_layout
 server = app.server
 
 
-def load_config(json_file):
+def load_config(json_file: str) -> Dict[str, Any]:
     """
-    Load configuration from a JSON file.
+    Load and parse a radar configuration from a JSON file.
 
-    :param json_file: The path to the JSON file.
-    :type json_file: str
-    :return: The loaded configuration as a dictionary.
-    :rtype: dict
-    :example:
-    >>> config = load_config("config.json")"""
+    Parameters
+    ----------
+    json_file : str
+        Path to the JSON configuration file
 
+    Returns
+    -------
+    dict
+        Parsed configuration data containing radar parameters
+
+    Raises
+    ------
+    JSONDecodeError
+        If the file contains invalid JSON
+    FileNotFoundError
+        If the specified file does not exist
+    """
     with open(json_file, "r", encoding="utf-8") as read_file:
         return json.load(read_file)
 
@@ -70,17 +83,31 @@ def load_config(json_file):
         "sensor_store": State("sensor-store", "data"),
     },
 )
-def reload(unused_btn, sensor_store):
+def reload(unused_btn: Any, sensor_store: str) -> Dict[str, Any]:
     """
-    Reload sensor options and values.
+    Reload the list of available radar sensor configurations.
 
-    :param unused_btn: Unused parameter, can be any value.
-    :param sensor_store: The current sensor value.
-    :type sensor_store: str
-    :return: A dictionary containing updated sensor options and values.
-    :rtype: dict
-    :example:
-    >>> result = reload("unused", "sensor1.json")
+    Scans the ./radar directory for .json configuration files and updates
+    the sensor selection dropdown.
+
+    Parameters
+    ----------
+    unused_btn : Any
+        Unused click event parameter
+    sensor_store : str
+        Currently selected sensor value
+
+    Returns
+    -------
+    dict
+        Dictionary containing:
+            sensor_opts: List of available sensor options
+            sensor_val: Currently selected sensor value
+
+    Notes
+    -----
+    The function maintains the currently selected sensor if still available,
+    otherwise defaults to the first sensor found.
     """
 
     radar_list = []
@@ -112,22 +139,39 @@ def reload(unused_btn, sensor_store):
     },
     prevent_initial_call=True,
 )
-def upload_config(list_of_contents, list_of_names, unused_list_of_dates, n_clicks):
+def upload_config(
+    list_of_contents: Optional[str],
+    list_of_names: str,
+    unused_list_of_dates: Any,
+    n_clicks: int
+) -> Dict[str, Union[int, str]]:
     """
-    Upload and save a configuration file.
+    Process and save an uploaded radar configuration file.
 
-    :param list_of_contents: The base64-encoded contents of the file.
-    :type list_of_contents: str
-    :param list_of_names: The name of the file.
-    :type list_of_names: str
-    :param unused_list_of_dates: Unused parameter, can be any value.
-    :param n_clicks: The number of times the upload button has been clicked.
-    :type n_clicks: int
-    :return: A dictionary containing the updated "reload" value and the "sensor_store" value.
-    :rtype: dict
-    :raises PreventUpdate: If the list_of_contents is None.
-    :example:
-    >>> result = upload_config("base64-encoded-contents", "config.json", "unused", 3)
+    Parameters
+    ----------
+    list_of_contents : str
+        Base64 encoded contents of the uploaded file
+    list_of_names : str
+        Name of the uploaded file 
+    unused_list_of_dates : Any
+        Unused parameter for file modification dates
+    n_clicks : int
+        Number of times the upload button has been clicked
+
+    Returns
+    -------
+    dict
+        Dictionary containing:
+            reload: Updated click counter
+            sensor_store: Name of the saved configuration file
+
+    Raises
+    ------
+    PreventUpdate
+        If no file contents are provided
+    JSONDecodeError
+        If the uploaded file contains invalid JSON
     """
 
     if list_of_contents is None:
@@ -161,19 +205,29 @@ def upload_config(list_of_contents, list_of_names, unused_list_of_dates, n_click
     },
     prevent_initial_call=True,
 )
-def sensor_select(sensor, misalgin_state):
+def sensor_select(sensor: str, misalgin_state: float) -> Dict[str, Any]:
     """
-    Select and configure a sensor.
+    Configure display parameters based on selected radar sensor.
 
-    :param sensor: The name of the sensor configuration file.
-    :type sensor: str
-    :param misalgin_state: The current misalignment state.
-    :type misalgin_state: float
-    :return: A dictionary containing the sensor configuration,
-        misalignment range and state, and other relevant information.
-    :rtype: dict
-    :example:
-    >>> result = sensor_select("sensor1.json", 0.5)
+    Loads the sensor configuration and sets up misalignment ranges and values.
+
+    Parameters
+    ----------
+    sensor : str
+        Name of the selected sensor configuration file
+    misalgin_state : float
+        Current misalignment angle value
+
+    Returns
+    -------
+    dict
+        Dictionary containing updated sensor configuration and UI parameters:
+            config: Full sensor configuration
+            misalign_min/max: Misalignment angle limits
+            misalign: Current misalignment value
+            misalign_input_min/max: Input field limits
+            misalign_input: Current input value
+            sensor_store: Selected sensor name
     """
 
     config = load_config("./radar/" + sensor)
@@ -206,16 +260,21 @@ def sensor_select(sensor, misalgin_state):
     },
     prevent_initial_call=True,
 )
-def clear_plot(unused_clear_btn, unused_plot_type):
+def clear_plot(unused_clear_btn: Any, unused_plot_type: Any) -> Dict[str, List]:
     """
-    Clear the plot.
+    Clear all plots from the display.
 
-    :param unused_clear_btn: Unused parameter, can be any value.
-    :param unused_plot_type: Unused parameter, can be any value.
-    :return: A dictionary containing an empty list for "fig_data".
-    :rtype: dict
-    :example:
-    >>> result = clear_plot("unused", "unused")
+    Parameters
+    ----------
+    unused_clear_btn : Any
+        Unused clear button click event
+    unused_plot_type : Any
+        Unused plot type parameter
+
+    Returns
+    -------
+    dict
+        Empty figure data dictionary
     """
 
     return {"fig_data": []}
@@ -233,19 +292,26 @@ def clear_plot(unused_clear_btn, unused_plot_type):
     },
     prevent_initial_call=True,
 )
-def clear_last_plot(unused_clear_btn, fig_data_input):
+def clear_last_plot(unused_clear_btn: Any, fig_data_input: List) -> Dict[str, List]:
     """
-    Clear the last plot.
+    Remove the most recently added plot from the display.
 
-    :param unused_clear_btn: Unused parameter, can be any value.
-    :param unused_plot_type: Unused parameter, can be any value.
-    :param fig_data_input: The input list of figure data.
-    :type fig_data_input: list
-    :return: A dictionary containing the updated "fig_data" list after removing the last plot.
-    :rtype: dict
-    :raises PreventUpdate: If the fig_data_input list is empty.
-    :example:
-    >>> result = clear_last_plot("unused", "unused", [{"x": [1, 2, 3], "y": [4, 5, 6]}])
+    Parameters
+    ----------
+    unused_clear_btn : Any
+        Unused clear button click event
+    fig_data_input : list
+        Current list of plot data
+
+    Returns
+    -------
+    dict
+        Updated figure data with last plot removed
+
+    Raises
+    ------
+    PreventUpdate
+        If there are no plots to remove
     """
 
     if len(fig_data_input) > 0:
@@ -268,20 +334,27 @@ def clear_last_plot(unused_clear_btn, fig_data_input):
     },
     prevent_initial_call=True,
 )
-def hold_plot(unused_hold_btn, current_figs, new_fig):
+def hold_plot(
+    unused_hold_btn: Any,
+    current_figs: List,
+    new_fig: List
+) -> Dict[str, List]:
     """
-    Hold and add a new plot.
+    Add a new plot while maintaining existing plots.
 
-    :param unused_hold_btn: Unused parameter, can be any value.
-    :param current_figs: The current list of figure data.
-    :type current_figs: list
-    :param new_fig: The new figure data to be added.
-    :type new_fig: list
-    :return: A dictionary containing the updated "fig_data" list after adding the new plot.
-    :rtype: dict
-    :example:
-    >>> result = hold_plot("unused", [{"x": [1, 2, 3], "y": [4, 5, 6]}],
-    ...     [{"x": [7, 8, 9], "y": [10, 11, 12]}])
+    Parameters
+    ----------
+    unused_hold_btn : Any
+        Unused hold button click event
+    current_figs : list
+        List of existing plot data
+    new_fig : list
+        New plot data to add
+
+    Returns
+    -------
+    dict
+        Combined figure data including new plot
     """
 
     return {"fig_data": current_figs + new_fig}
@@ -323,79 +396,84 @@ def hold_plot(unused_hold_btn, current_figs, new_fig):
     prevent_initial_call=True,
 )
 def coverage_plot(
-    pd,
-    pfa,
-    rcs,
-    fascia_loss,
-    mfg_loss,
-    temp_loss,
-    rain_loss,
-    vert_misalign_angle,
-    az_offset,
-    sw_model,
-    plot_type,
-    new_legend_entry,
-    min_pd,
-    max_pd,
-    min_pfa,
-    max_pfa,
-    fig_data,
-    flip,
-    long_offset,
-    lat_offset,
-    height_offset,
-    config,
-):
+    pd: float,
+    pfa: float,
+    rcs: float,
+    fascia_loss: float,
+    mfg_loss: float,
+    temp_loss: float,
+    rain_loss: float,
+    vert_misalign_angle: float,
+    az_offset: float,
+    sw_model: str,
+    plot_type: str,
+    new_legend_entry: str,
+    min_pd: float,
+    max_pd: float,
+    min_pfa: float,
+    max_pfa: float,
+    fig_data: List,
+    flip: List[str],
+    long_offset: float,
+    lat_offset: float,
+    height_offset: float,
+    config: Dict[str, Any]
+) -> Dict[str, Any]:
     """
     Generate a coverage plot based on the input parameters.
 
-    :param pd: Probability of detection.
-    :type pd: float
-    :param pfa: Probability of false alarm.
-    :type pfa: float
-    :param rcs: Radar cross section.
-    :type rcs: float
-    :param fascia_loss: Fascia loss.
-    :type fascia_loss: float
-    :param mfg_loss: MFG loss.
-    :type mfg_loss: float
-    :param temp_loss: Temperature loss.
-    :type temp_loss: float
-    :param rain_loss: Rain loss.
-    :type rain_loss: float
-    :param vert_misalign_angle: Vertical misalignment angle.
-    :type vert_misalign_angle: float
-    :param az_offset: Azimuth offset.
-    :type az_offset: float
-    :param sw_model: Software model.
-    :type sw_model: str
-    :param plot_type: Type of coverage plot.
-    :type plot_type: str
-    :param new_legend_entry: New legend entry.
-    :type new_legend_entry: str
-    :param min_pd: Minimum probability of detection.
-    :type min_pd: float
-    :param max_pd: Maximum probability of detection.
-    :type max_pd: float
-    :param min_pfa: Minimum probability of false alarm.
-    :type min_pfa: float
-    :param max_pfa: Maximum probability of false alarm.
-    :type max_pfa: float
-    :param fig_data: Existing figure data.
-    :type fig_data: list
-    :param flip: Flip patterns.
-    :type flip: list
-    :param long_offset: Longitude offset.
-    :type long_offset: float
-    :param lat_offset: Latitude offset.
-    :type lat_offset: float
-    :param height_offset: Height offset.
-    :type height_offset: float
-    :param config: Configuration parameters.
-    :type config: dict
-    :return: A dictionary containing the updated figure data,
-        figure layout, property container, and legend entry.
-    :rtype: dict
+    Parameters
+    ----------
+    pd : float
+        Probability of detection
+    pfa : float
+        Probability of false alarm
+    rcs : float
+        Radar cross section
+    fascia_loss : float
+        Fascia loss
+    mfg_loss : float
+        Manufacturing loss
+    temp_loss : float
+        Temperature loss
+    rain_loss : float
+        Rain loss
+    vert_misalign_angle : float
+        Vertical misalignment angle
+    az_offset : float
+        Azimuth offset
+    sw_model : str
+        Software model
+    plot_type : str
+        Type of coverage plot
+    new_legend_entry : str
+        New legend entry
+    min_pd : float
+        Minimum probability of detection
+    max_pd : float
+        Maximum probability of detection
+    min_pfa : float
+        Minimum probability of false alarm
+    max_pfa : float
+        Maximum probability of false alarm
+    fig_data : list
+        Existing figure data
+    flip : list
+        Flip patterns
+    long_offset : float
+        Longitude offset
+    lat_offset : float
+        Latitude offset
+    height_offset : float
+        Height offset
+    config : dict
+        Configuration parameters
+
+    Returns
+    -------
+    dict
+        Dictionary containing the updated figure data,
+        figure layout, property container, and legend entry
     """
 
     if pd is None:
@@ -689,16 +767,21 @@ def coverage_plot(
     State("scatter", "figure"),
     prevent_initial_call=True,
 )
-def export_png(unused_n_clicks, fig):
+def export_png(unused_n_clicks: Any, fig: Dict[str, Any]) -> Any:
     """
     Export the current figure as a PNG file.
 
-    :param unused_n_clicks: Unused parameter, can be any value.
-    :param fig: The figure object to be exported.
-    :return: Sends the exported PNG file to the user for download.
-    :rtype: dcc.send_file
-    :example:
-    >>> result = export_png("unused", fig)
+    Parameters
+    ----------
+    unused_n_clicks : Any
+        Unused click event parameter
+    fig : dict
+        The figure object to be exported
+
+    Returns
+    -------
+    dcc.send_file
+        Sends the exported PNG file to the user for download
     """
 
     figure = go.Figure(fig)
@@ -716,16 +799,21 @@ def export_png(unused_n_clicks, fig):
     State("scatter", "figure"),
     prevent_initial_call=True,
 )
-def export_svg(unused_n_clicks, fig):
+def export_svg(unused_n_clicks: Any, fig: Dict[str, Any]) -> Any:
     """
     Export the current figure as an SVG file.
 
-    :param unused_n_clicks: Unused parameter, can be any value.
-    :param fig: The figure object to be exported.
-    :return: Sends the exported SVG file to the user for download.
-    :rtype: dcc.send_file
-    :example:
-    >>> result = export_svg("unused", fig)
+    Parameters
+    ----------
+    unused_n_clicks : Any
+        Unused click event parameter
+    fig : dict
+        The figure object to be exported
+
+    Returns
+    -------
+    dcc.send_file
+        Sends the exported SVG file to the user for download
     """
 
     figure = go.Figure(fig)
@@ -743,16 +831,21 @@ def export_svg(unused_n_clicks, fig):
     State("scatter", "figure"),
     prevent_initial_call=True,
 )
-def export_html(unused_n_clicks, fig):
+def export_html(unused_n_clicks: Any, fig: Dict[str, Any]) -> Any:
     """
     Export the current figure as an HTML file.
 
-    :param unused_n_clicks: Unused parameter, can be any value.
-    :param fig: The figure object to be exported.
-    :return: Sends the exported HTML file to the user for download.
-    :rtype: dcc.send_file
-    :example:
-    >>> result = export_html("unused", fig)
+    Parameters
+    ----------
+    unused_n_clicks : Any
+        Unused click event parameter
+    fig : dict
+        The figure object to be exported
+
+    Returns
+    -------
+    dcc.send_file
+        Sends the exported HTML file to the user for download
     """
 
     figure = go.Figure(fig)
@@ -773,17 +866,27 @@ def export_html(unused_n_clicks, fig):
     ],
     prevent_initial_call=True,
 )
-def export_data(unused_n_clicks, data, plot_type):
+def export_data(
+    unused_n_clicks: Any,
+    data: List[Dict[str, List[float]]],
+    plot_type: str
+) -> Any:
     """
     Export the raw data as a CSV file.
 
-    :param unused_n_clicks: Unused parameter, can be any value.
-    :param data: The data to be exported.
-    :param plot_type: The type of plot associated with the data.
-    :return: Sends the exported CSV file to the user for download.
-    :rtype: dcc.send_data_frame
-    :example:
-    >>> result = export_data("unused", data, "Azimuth Coverage")
+    Parameters
+    ----------
+    unused_n_clicks : Any
+        Unused click event parameter
+    data : list
+        The data to be exported
+    plot_type : str
+        The type of plot associated with the data
+
+    Returns
+    -------
+    dcc.send_data_frame
+        Sends the exported CSV file to the user for download
     """
 
     if plot_type == "Azimuth Coverage":
@@ -815,17 +918,29 @@ def export_data(unused_n_clicks, data, plot_type):
     Input("rcs-input", "value"),
     Input("rcs", "value"),
 )
-def link_rcs(rcs_input, rcs_slider):
+def link_rcs(
+    rcs_input: Optional[float],
+    rcs_slider: float
+) -> Tuple[float, float]:
     """
     Link the RCS input and slider values.
 
-    :param rcs_input: The input value of RCS.
-    :param rcs_slider: The value of RCS selected using a slider.
-    :return: A tuple containing the linked values for RCS.
-    :rtype: tuple
-    :raises: PreventUpdate if the RCS input value is None.
-    :example:
-    >>> result = link_rcs(10, None)
+    Parameters
+    ----------
+    rcs_input : float
+        The input value of RCS
+    rcs_slider : float
+        The value of RCS selected using a slider
+
+    Returns
+    -------
+    tuple
+        A tuple containing the linked values for RCS
+
+    Raises
+    ------
+    PreventUpdate
+        If the RCS input value is None
     """
 
     ctx = dash.callback_context
@@ -844,17 +959,29 @@ def link_rcs(rcs_input, rcs_slider):
     Input("fascia-input", "value"),
     Input("fascia", "value"),
 )
-def link_fascia(fascia_input, fascia_slider):
+def link_fascia(
+    fascia_input: Optional[float],
+    fascia_slider: float
+) -> Tuple[float, float]:
     """
     Link the Fascia input and slider values.
 
-    :param fascia_input: The input value of Fascia.
-    :param fascia_slider: The value of Fascia selected using a slider.
-    :return: A tuple containing the linked values for Fascia.
-    :rtype: tuple
-    :raises: PreventUpdate if the Fascia input value is None.
-    :example:
-    >>> result = link_fascia(1, None)
+    Parameters
+    ----------
+    fascia_input : float
+        The input value of Fascia
+    fascia_slider : float
+        The value of Fascia selected using a slider
+
+    Returns
+    -------
+    tuple
+        A tuple containing the linked values for Fascia
+
+    Raises
+    ------
+    PreventUpdate
+        If the Fascia input value is None
     """
 
     ctx = dash.callback_context
@@ -873,17 +1000,29 @@ def link_fascia(fascia_input, fascia_slider):
     Input("mfg-input", "value"),
     Input("mfg", "value"),
 )
-def link_mfg(mfg_input, mfg_slider):
+def link_mfg(
+    mfg_input: Optional[float],
+    mfg_slider: float
+) -> Tuple[float, float]:
     """
     Link the Manufacturing Loss input and slider values.
 
-    :param mfg_input: The input value of Manufacturing Loss.
-    :param mfg_slider: The value of Manufacturing Loss selected using a slider.
-    :return: A tuple containing the linked values for Manufacturing Loss.
-    :rtype: tuple
-    :raises: PreventUpdate if the Manufacturing Loss input value is None.
-    :example:
-    >>> result = link_mfg(2, None)
+    Parameters
+    ----------
+    mfg_input : float
+        The input value of Manufacturing Loss
+    mfg_slider : float
+        The value of Manufacturing Loss selected using a slider
+
+    Returns
+    -------
+    tuple
+        A tuple containing the linked values for Manufacturing Loss
+
+    Raises
+    ------
+    PreventUpdate
+        If the Manufacturing Loss input value is None
     """
 
     ctx = dash.callback_context
@@ -902,17 +1041,29 @@ def link_mfg(mfg_input, mfg_slider):
     Input("temp-input", "value"),
     Input("temp", "value"),
 )
-def link_temp(temp_input, temp_slider):
+def link_temp(
+    temp_input: Optional[float],
+    temp_slider: float
+) -> Tuple[float, float]:
     """
     Link the Temperature Loss input and slider values.
 
-    :param temp_input: The input value of Temperature Loss.
-    :param temp_slider: The value of Temperature Loss selected using a slider.
-    :return: A tuple containing the linked values for Temperature Loss.
-    :rtype: tuple
-    :raises: PreventUpdate if the Temperature Loss input value is None.
-    :example:
-    >>> result = link_temp(-3, None)
+    Parameters
+    ----------
+    temp_input : float
+        The input value of Temperature Loss
+    temp_slider : float
+        The value of Temperature Loss selected using a slider
+
+    Returns
+    -------
+    tuple
+        A tuple containing the linked values for Temperature Loss
+
+    Raises
+    ------
+    PreventUpdate
+        If the Temperature Loss input value is None
     """
 
     ctx = dash.callback_context
@@ -931,17 +1082,29 @@ def link_temp(temp_input, temp_slider):
     Input("rain-input", "value"),
     Input("rain", "value"),
 )
-def link_rain(rain_input, rain_slider):
+def link_rain(
+    rain_input: Optional[float],
+    rain_slider: float
+) -> Tuple[float, float]:
     """
     Link the Rain Loss input and slider values.
 
-    :param rain_input: The input value of Rain Loss.
-    :param rain_slider: The value of Rain Loss selected using a slider.
-    :return: A tuple containing the linked values for Rain Loss.
-    :rtype: tuple
-    :raises: PreventUpdate if the Rain Loss input value is None.
-    :example:
-    >>> result = link_rain(-3, None)
+    Parameters
+    ----------
+    rain_input : float
+        The input value of Rain Loss
+    rain_slider : float
+        The value of Rain Loss selected using a slider
+
+    Returns
+    -------
+    tuple
+        A tuple containing the linked values for Rain Loss
+
+    Raises
+    ------
+    PreventUpdate
+        If the Rain Loss input value is None
     """
 
     ctx = dash.callback_context
@@ -961,17 +1124,29 @@ def link_rain(rain_input, rain_slider):
     Input("misalign", "value"),
     prevent_initial_call=True,
 )
-def link_misalign(misalign_input, misalign_slider):
+def link_misalign(
+    misalign_input: Optional[float],
+    misalign_slider: float
+) -> Tuple[float, float]:
     """
     Link the Vertical Misalignment Angle input and slider values.
 
-    :param misalign_input: The input value of Vertical Misalignment Angle.
-    :param misalign_slider: The value of Vertical Misalignment Angle selected using a slider.
-    :return: A tuple containing the linked values for Vertical Misalignment Angle.
-    :rtype: tuple
-    :raises: PreventUpdate if the Vertical Misalignment Angle input value is None.
-    :example:
-    >>> result = link_misalign(0, None)
+    Parameters
+    ----------
+    misalign_input : float
+        The input value of Vertical Misalignment Angle
+    misalign_slider : float
+        The value of Vertical Misalignment Angle selected using a slider
+
+    Returns
+    -------
+    tuple
+        A tuple containing the linked values for Vertical Misalignment Angle
+
+    Raises
+    ------
+    PreventUpdate
+        If the Vertical Misalignment Angle input value is None
     """
 
     ctx = dash.callback_context
@@ -990,17 +1165,29 @@ def link_misalign(misalign_input, misalign_slider):
     Input("az-offset-input", "value"),
     Input("az-offset", "value"),
 )
-def link_azoffset(azoffset_input, az_slider):
+def link_azoffset(
+    azoffset_input: Optional[float],
+    az_slider: float
+) -> Tuple[float, float]:
     """
     Link the Azimuth Offset input and slider values.
 
-    :param azoffset_input: The input value of Azimuth Offset.
-    :param az_slider: The value of Azimuth Offset selected using a slider.
-    :return: A tuple containing the linked values for Azimuth Offset.
-    :rtype: tuple
-    :raises: PreventUpdate if the Azimuth Offset input value is None.
-    :example:
-    >>> result = link_azoffset(0, None)
+    Parameters
+    ----------
+    azoffset_input : float
+        The input value of Azimuth Offset
+    az_slider : float
+        The value of Azimuth Offset selected using a slider
+
+    Returns
+    -------
+    tuple
+        A tuple containing the linked values for Azimuth Offset
+
+    Raises
+    ------
+    PreventUpdate
+        If the Azimuth Offset input value is None
     """
 
     ctx = dash.callback_context
@@ -1019,17 +1206,29 @@ def link_azoffset(azoffset_input, az_slider):
     Input("long-input", "value"),
     Input("long", "value"),
 )
-def link_long(long_input, long_slider):
+def link_long(
+    long_input: Optional[float],
+    long_slider: float
+) -> Tuple[float, float]:
     """
     Link the Longitude Offset input and slider values.
 
-    :param long_input: The input value of Longitude Offset.
-    :param long_slider: The value of Longitude Offset selected using a slider.
-    :return: A tuple containing the linked values for Longitude Offset.
-    :rtype: tuple
-    :raises: PreventUpdate if the Longitude Offset input value is None.
-    :example:
-    >>> result = link_long(0, None)
+    Parameters
+    ----------
+    long_input : float
+        The input value of Longitude Offset
+    long_slider : float
+        The value of Longitude Offset selected using a slider
+
+    Returns
+    -------
+    tuple
+        A tuple containing the linked values for Longitude Offset
+
+    Raises
+    ------
+    PreventUpdate
+        If the Longitude Offset input value is None
     """
 
     ctx = dash.callback_context
@@ -1048,17 +1247,29 @@ def link_long(long_input, long_slider):
     Input("lat-input", "value"),
     Input("lat", "value"),
 )
-def link_lat(lat_input, lat_slider):
+def link_lat(
+    lat_input: Optional[float],
+    lat_slider: float
+) -> Tuple[float, float]:
     """
     Link the Latitude Offset input and slider values.
 
-    :param lat_input: The input value of Latitude Offset.
-    :param lat_slider: The value of Latitude Offset selected using a slider.
-    :return: A tuple containing the linked values for Latitude Offset.
-    :rtype: tuple
-    :raises: PreventUpdate if the Latitude Offset input value is None.
-    :example:
-    >>> result = link_lat(0, None)
+    Parameters
+    ----------
+    lat_input : float
+        The input value of Latitude Offset
+    lat_slider : float
+        The value of Latitude Offset selected using a slider
+
+    Returns
+    -------
+    tuple
+        A tuple containing the linked values for Latitude Offset
+
+    Raises
+    ------
+    PreventUpdate
+        If the Latitude Offset input value is None
     """
 
     ctx = dash.callback_context
@@ -1077,17 +1288,29 @@ def link_lat(lat_input, lat_slider):
     Input("height-input", "value"),
     Input("height", "value"),
 )
-def link_height(height_input, height_slider):
+def link_height(
+    height_input: Optional[float],
+    height_slider: float
+) -> Tuple[float, float]:
     """
     Link the Height Offset input and slider values.
 
-    :param height_input: The input value of Height Offset.
-    :param height_slider: The value of Height Offset selected using a slider.
-    :return: A tuple containing the linked values for Height Offset.
-    :rtype: tuple
-    :raises: PreventUpdate if the Height Offset input value is None.
-    :example:
-    >>> result = link_height(0, None)
+    Parameters
+    ----------
+    height_input : float
+        The input value of Height Offset
+    height_slider : float
+        The value of Height Offset selected using a slider
+
+    Returns
+    -------
+    tuple
+        A tuple containing the linked values for Height Offset
+
+    Raises
+    ------
+    PreventUpdate
+        If the Height Offset input value is None
     """
 
     ctx = dash.callback_context

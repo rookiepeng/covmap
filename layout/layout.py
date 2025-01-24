@@ -1,5 +1,8 @@
 """
     Copyright (C) 2023 - PRESENT  Zhengyu Peng
+    
+    This module defines the layout and UI components for a radar coverage mapping application.
+    It creates a responsive web interface using Dash and Bootstrap components.
 """
 
 from dash import dcc
@@ -10,16 +13,17 @@ import dash_bootstrap_components as dbc
 import plotly.io as pio
 
 
+# Define available target integration/model types
 INTEGRATION = [
-    "Swerling 0",
-    "Swerling 1",
-    "Swerling 2",
-    "Swerling 3",
-    "Swerling 4",
-    "Coherent",
+    "Swerling 0",  # Constant RCS target
+    "Swerling 1",  # Fluctuating RCS, scan-to-scan variation
+    "Swerling 2",  # Fluctuating RCS, pulse-to-pulse variation
+    "Swerling 3",  # Fluctuating RCS, scan-to-scan variation with higher mean
+    "Swerling 4",  # Fluctuating RCS, pulse-to-pulse variation with higher mean
+    "Coherent",    # Coherent integration
 ]
 
-# menu items for export
+# Export menu configuration - allows users to export plots in different formats
 export_menu_items = [
     dbc.DropdownMenuItem("Export PNG", id="export-png"),
     dbc.Tooltip(
@@ -48,7 +52,8 @@ export_menu_items = [
     ),
 ]
 
-# checklist for flipping azimuth or elevation patterns
+# Checklist for pattern manipulation
+# Allows users to flip azimuth or elevation patterns for better visualization
 flip_checklist = dbc.Checklist(
     options=[
         {"label": "Flip Azimuth", "value": "flip_az"},
@@ -59,7 +64,8 @@ flip_checklist = dbc.Checklist(
     inline=True,
 )
 
-# slider to change target RCS
+# Target RCS (Radar Cross Section) control
+# Allows adjustment of target RCS from -30 to 30 dBsm
 rcs_slider = html.Div(
     [
         dbc.InputGroup(
@@ -91,7 +97,8 @@ rcs_slider = html.Div(
     ],
 )
 
-# slider to change fascia loss
+# Fascia loss control
+# Accounts for signal loss due to vehicle fascia/radome
 fascia_slider = html.Div(
     [
         dbc.InputGroup(
@@ -123,7 +130,8 @@ fascia_slider = html.Div(
     ],
 )
 
-# slider to change manufacturer margin
+# Manufacturing margin control
+# Accounts for manufacturing variations and tolerances
 mfg_slider = html.Div(
     [
         dbc.InputGroup(
@@ -155,7 +163,8 @@ mfg_slider = html.Div(
     ],
 )
 
-# slider to change temperature loss
+# Temperature-related loss control
+# Accounts for performance variations due to temperature
 temp_slider = html.Div(
     [
         dbc.InputGroup(
@@ -187,7 +196,8 @@ temp_slider = html.Div(
     ],
 )
 
-# slider to change rain loss
+# Rain-induced loss control
+# Accounts for signal attenuation due to rain
 rain_slider = html.Div(
     [
         dbc.InputGroup(
@@ -219,7 +229,8 @@ rain_slider = html.Div(
     ],
 )
 
-# slider to change elevation misalignment
+# Elevation misalignment control
+# Allows adjustment for mounting angle errors
 misalign_slider = html.Div(
     [
         dbc.InputGroup(
@@ -251,7 +262,8 @@ misalign_slider = html.Div(
     ],
 )
 
-# slider to change azimuth offset
+# Azimuth offset control
+# Allows adjustment of azimuth angle offset
 az_slider = html.Div(
     [
         dbc.InputGroup(
@@ -288,6 +300,8 @@ az_slider = html.Div(
     ],
 )
 
+# Longitudinal position offset control
+# Adjusts sensor position along vehicle's length
 long_slider = html.Div(
     [
         dbc.InputGroup(
@@ -319,6 +333,8 @@ long_slider = html.Div(
     ],
 )
 
+# Lateral position offset control
+# Adjusts sensor position across vehicle's width
 lat_slider = html.Div(
     [
         dbc.InputGroup(
@@ -350,6 +366,8 @@ lat_slider = html.Div(
     ],
 )
 
+# Height offset control
+# Adjusts sensor mounting height
 height_slider = html.Div(
     [
         dbc.InputGroup(
@@ -381,6 +399,7 @@ height_slider = html.Div(
     ],
 )
 
+# Main plotting card containing all UI controls and the plot
 plot_card = dbc.Card(
     [
         dbc.CardBody(
@@ -627,14 +646,19 @@ plot_card = dbc.Card(
 
 def get_app_layout():
     """
-    Define the layout for the Dash application.
+    Get the main layout for the radar coverage map application.
 
-    :return: The container element that holds the layout of the application.
-    :rtype: dbc.Container
-    :example:
-    >>> result = get_app_layout()
+    Returns:
+        dbc.Container: A Dash Bootstrap container that defines the complete UI layout,
+            including:
+            - Data stores for configuration and figures
+            - Main plotting card with controls
+            - Interactive elements like sliders and dropdowns
+            - Download component for exporting data
+            - Version information footer
+
+    The layout is responsive and uses Bootstrap's fluid container system.
     """
-
     return dbc.Container(
         [
             dcc.Store(id="config"),
