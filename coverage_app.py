@@ -376,6 +376,7 @@ def hold_plot(
         "temp_loss": Input("temp-input", "value"),
         "rain_loss": Input("rain-input", "value"),
         "vert_misalign_angle": Input("misalign-input", "value"),
+        "roll_offset": Input("roll-offset-input", "value"),
         "az_offset": Input("az-offset-input", "value"),
         "sw_model": Input("integration", "value"),
         "plot_type": Input("plot", "value"),
@@ -404,6 +405,7 @@ def coverage_plot(
     temp_loss: float,
     rain_loss: float,
     vert_misalign_angle: float,
+    roll_offset: float,
     az_offset: float,
     sw_model: str,
     plot_type: str,
@@ -440,6 +442,8 @@ def coverage_plot(
         Rain loss
     vert_misalign_angle : float
         Vertical misalignment angle
+    roll_offset : float
+        Roll offset around boresight axis
     az_offset : float
         Azimuth offset
     sw_model : str
@@ -497,6 +501,8 @@ def coverage_plot(
     if rain_loss is None:
         raise PreventUpdate
     if vert_misalign_angle is None:
+        raise PreventUpdate
+    if roll_offset is None:
         raise PreventUpdate
     if az_offset is None:
         raise PreventUpdate
@@ -575,14 +581,11 @@ def coverage_plot(
     min_snr = roc_snr(pfa, pd, 1, sw_model)
     nci_gain = roc_snr(pfa, pd, 1, sw_model) - roc_snr(pfa, pd, channels, sw_model)
 
-    el_missalign_loss = el_ptn[np.where(el_ang == vert_misalign_angle)[0][0]]
-    el_missalign_loss_linear = 10 ** (el_missalign_loss / 40)
+    roll_rad = roll_offset / 180 * np.pi
 
-    if az_offset >= az_start and az_offset <= az_end:
-        az_offset_loss = az_ptn[np.where(az_ang == az_offset)[0][0]]
-    else:
-        az_offset_loss = -100000
-    az_offset_loss_linear = 10 ** (az_offset_loss / 40)
+    # Compute misalignment loss at boresight for display purposes
+    el_at_boresight = vert_misalign_angle * np.cos(roll_rad)
+    el_missalign_loss = np.interp(el_at_boresight, el_ang, el_ptn, left=-1000, right=-1000)
 
     max_range = 10 ** (
         (
@@ -627,7 +630,13 @@ def coverage_plot(
         fig_data = []
 
     if plot_type == "Azimuth Coverage":
-        coverage = max_range * 10 ** (az_ptn / 40) * el_missalign_loss_linear
+        # With roll offset, compute antenna-frame angles for each ground azimuth
+        az_antenna = az_ang * np.cos(roll_rad) + vert_misalign_angle * np.sin(roll_rad)
+        el_antenna = -az_ang * np.sin(roll_rad) + vert_misalign_angle * np.cos(roll_rad)
+        az_loss = np.interp(az_antenna, az_ang, az_ptn, left=-1000, right=-1000)
+        el_loss = np.interp(el_antenna, el_ang, el_ptn, left=-1000, right=-1000)
+        combined_ptn = az_loss + el_loss
+        coverage = max_range * 10 ** (combined_ptn / 40)
         coverage_long = (
             coverage * np.cos((az_ang + az_offset) / 180 * np.pi) + long_offset
         )
@@ -651,7 +660,12 @@ def coverage_plot(
             "yaxis": {"title": "Latitude (m)", "scaleanchor": "x", "scaleratio": 1},
         }
     elif plot_type == "Azimuth vs. Range":
-        coverage = max_range * 10 ** (az_ptn / 40) * el_missalign_loss_linear
+        az_antenna = az_ang * np.cos(roll_rad) + vert_misalign_angle * np.sin(roll_rad)
+        el_antenna = -az_ang * np.sin(roll_rad) + vert_misalign_angle * np.cos(roll_rad)
+        az_loss = np.interp(az_antenna, az_ang, az_ptn, left=-1000, right=-1000)
+        el_loss = np.interp(el_antenna, el_ang, el_ptn, left=-1000, right=-1000)
+        combined_ptn = az_loss + el_loss
+        coverage = max_range * 10 ** (combined_ptn / 40)
         new_fig = [
             {
                 "mode": "lines",
@@ -669,7 +683,13 @@ def coverage_plot(
             "yaxis": {"title": "Range (m)"},
         }
     elif plot_type == "Elevation Coverage":
-        coverage = max_range * 10 ** (el_ptn / 40) * az_offset_loss_linear
+        # With roll offset, compute antenna-frame angles for each ground elevation
+        az_antenna_el = az_offset * np.cos(roll_rad) + el_ang * np.sin(roll_rad)
+        el_antenna_el = -az_offset * np.sin(roll_rad) + el_ang * np.cos(roll_rad)
+        az_loss_el = np.interp(az_antenna_el, az_ang, az_ptn, left=-1000, right=-1000)
+        el_loss_el = np.interp(el_antenna_el, el_ang, el_ptn, left=-1000, right=-1000)
+        combined_ptn_el = az_loss_el + el_loss_el
+        coverage = max_range * 10 ** (combined_ptn_el / 40)
         coverage_long = (
             coverage * np.cos((el_ang + vert_misalign_angle) / 180 * np.pi)
             + long_offset
@@ -695,7 +715,12 @@ def coverage_plot(
             "yaxis": {"title": "Height (m)", "scaleanchor": "x", "scaleratio": 1},
         }
     elif plot_type == "Elevation vs. Range":
-        coverage = max_range * 10 ** (el_ptn / 40) * az_offset_loss_linear
+        az_antenna_el = az_offset * np.cos(roll_rad) + el_ang * np.sin(roll_rad)
+        el_antenna_el = -az_offset * np.sin(roll_rad) + el_ang * np.cos(roll_rad)
+        az_loss_el = np.interp(az_antenna_el, az_ang, az_ptn, left=-1000, right=-1000)
+        el_loss_el = np.interp(el_antenna_el, el_ang, el_ptn, left=-1000, right=-1000)
+        combined_ptn_el = az_loss_el + el_loss_el
+        coverage = max_range * 10 ** (combined_ptn_el / 40)
         new_fig = [
             {
                 "mode": "lines",
@@ -1156,6 +1181,47 @@ def link_misalign(
         raise PreventUpdate
 
     value = misalign_input if tri_id == "misalign-input" else misalign_slider
+    return value, value
+
+
+@app.callback(
+    Output("roll-offset-input", "value"),
+    Output("roll-offset", "value"),
+    Input("roll-offset-input", "value"),
+    Input("roll-offset", "value"),
+)
+def link_roll(
+    roll_input: Optional[float],
+    roll_slider: float
+) -> Tuple[float, float]:
+    """
+    Link the Roll Offset input and slider values.
+
+    Parameters
+    ----------
+    roll_input : float
+        The input value of Roll Offset
+    roll_slider : float
+        The value of Roll Offset selected using a slider
+
+    Returns
+    -------
+    tuple
+        A tuple containing the linked values for Roll Offset
+
+    Raises
+    ------
+    PreventUpdate
+        If the Roll Offset input value is None
+    """
+
+    ctx = dash.callback_context
+    tri_id = ctx.triggered[0]["prop_id"].split(".")[0]
+
+    if tri_id == "roll-offset-input" and roll_input is None:
+        raise PreventUpdate
+
+    value = roll_input if tri_id == "roll-offset-input" else roll_slider
     return value, value
 
 

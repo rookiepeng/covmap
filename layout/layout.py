@@ -262,6 +262,44 @@ misalign_slider = html.Div(
     ],
 )
 
+# Roll offset control
+# Allows adjustment of roll angle around boresight axis
+roll_slider = html.Div(
+    [
+        dbc.InputGroup(
+            [
+                dbc.InputGroupText("Roll offset"),
+                dbc.Input(
+                    id="roll-offset-input",
+                    type="number",
+                    min=-90,
+                    max=90,
+                    step=0.5,
+                    value=0,
+                ),
+                dbc.InputGroupText("deg"),
+                dbc.Tooltip(
+                    "Roll offset around boresight",
+                    target="roll-offset-input",
+                    placement="top",
+                ),
+            ],
+            size="sm",
+            className="mb-1",
+        ),
+        dcc.Slider(
+            id="roll-offset",
+            min=-90,
+            max=90,
+            step=0.5,
+            value=0,
+            marks=None,
+            updatemode="drag",
+            tooltip={"always_visible": False, "placement": "left"},
+        ),
+    ],
+)
+
 # Azimuth offset control
 # Allows adjustment of azimuth angle offset
 az_slider = html.Div(
@@ -541,6 +579,7 @@ plot_card = dbc.Card(
                                                     temp_slider,
                                                     rain_slider,
                                                     misalign_slider,
+                                                    roll_slider,
                                                     az_slider,
                                                     long_slider,
                                                     lat_slider,
