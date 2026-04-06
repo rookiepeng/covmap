@@ -1,8 +1,10 @@
 """
-    Copyright (C) 2023 - PRESENT  Zhengyu Peng
-    
-    Coverage Map Application - A tool for visualizing radar coverage patterns.
+Copyright (C) 2023 - PRESENT  Zhengyu Peng
+
+Coverage Map Application - A tool for visualizing radar coverage patterns.
 """
+
+from typing import Dict, List, Any, Tuple, Union, Optional
 
 import json
 import os
@@ -16,7 +18,6 @@ from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 
 import numpy as np
-import plotly.io as pio
 import plotly.graph_objects as go
 
 import pandas as pds
@@ -26,8 +27,6 @@ from flaskwebgui import FlaskUI
 from roc.tools import roc_snr
 
 from layout.layout import get_app_layout
-
-from typing import Dict, List, Any, Tuple, Union, Optional
 
 app = dash.Dash(
     __name__,
@@ -143,7 +142,7 @@ def upload_config(
     list_of_contents: Optional[str],
     list_of_names: str,
     unused_list_of_dates: Any,
-    n_clicks: int
+    n_clicks: int,
 ) -> Dict[str, Union[int, str]]:
     """
     Process and save an uploaded radar configuration file.
@@ -153,7 +152,7 @@ def upload_config(
     list_of_contents : str
         Base64 encoded contents of the uploaded file
     list_of_names : str
-        Name of the uploaded file 
+        Name of the uploaded file
     unused_list_of_dates : Any
         Unused parameter for file modification dates
     n_clicks : int
@@ -335,9 +334,7 @@ def clear_last_plot(unused_clear_btn: Any, fig_data_input: List) -> Dict[str, Li
     prevent_initial_call=True,
 )
 def hold_plot(
-    unused_hold_btn: Any,
-    current_figs: List,
-    new_fig: List
+    unused_hold_btn: Any, current_figs: List, new_fig: List
 ) -> Dict[str, List]:
     """
     Add a new plot while maintaining existing plots.
@@ -383,6 +380,7 @@ def hold_plot(
         "fig_data": Input("figure-data", "data"),
         "new_legend_entry": Input("legend", "value"),
         "flip": Input("flip-checklist", "value"),
+        "inset_position": Input("inset-position", "value"),
         "long_offset": Input("long-input", "value"),
         "lat_offset": Input("lat-input", "value"),
         "height_offset": Input("height-input", "value"),
@@ -416,10 +414,11 @@ def coverage_plot(
     max_pfa: float,
     fig_data: List,
     flip: List[str],
+    inset_position: str,
     long_offset: float,
     lat_offset: float,
     height_offset: float,
-    config: Dict[str, Any]
+    config: Dict[str, Any],
 ) -> Dict[str, Any]:
     """
     Generate a coverage plot based on the input parameters.
@@ -559,7 +558,9 @@ def coverage_plot(
         az_ang_full = np.flip(-az_ang_full)
 
     # Trimmed arrays with edge clamping for sweep/display
-    idx = np.where(np.logical_and(az_ang_full >= az_start - 1, az_ang_full <= az_end + 1))
+    idx = np.where(
+        np.logical_and(az_ang_full >= az_start - 1, az_ang_full <= az_end + 1)
+    )
     az_ang = az_ang_full[idx]
     az_ptn = az_ptn_full[idx].copy()
     az_ptn[0] = -1000
@@ -574,7 +575,9 @@ def coverage_plot(
         el_ang_full = np.flip(-el_ang_full)
 
     # Trimmed arrays with edge clamping for sweep/display
-    idx = np.where(np.logical_and(el_ang_full >= el_start - 1, el_ang_full <= el_end + 1))
+    idx = np.where(
+        np.logical_and(el_ang_full >= el_start - 1, el_ang_full <= el_end + 1)
+    )
     el_ang = el_ang_full[idx]
     el_ptn = el_ptn_full[idx].copy()
     el_ptn[0] = -1000
@@ -588,8 +591,12 @@ def coverage_plot(
     # Compute misalignment loss at boresight for display purposes
     az_at_boresight = vert_misalign_angle * np.sin(roll_rad)
     el_at_boresight = vert_misalign_angle * np.cos(roll_rad)
-    az_loss_at_boresight = np.interp(az_at_boresight, az_ang_full, az_ptn_full, left=-1000, right=-1000)
-    el_loss_at_boresight = np.interp(el_at_boresight, el_ang_full, el_ptn_full, left=-1000, right=-1000)
+    az_loss_at_boresight = np.interp(
+        az_at_boresight, az_ang_full, az_ptn_full, left=-1000, right=-1000
+    )
+    el_loss_at_boresight = np.interp(
+        el_at_boresight, el_ang_full, el_ptn_full, left=-1000, right=-1000
+    )
     el_missalign_loss = az_loss_at_boresight + el_loss_at_boresight
 
     max_range = 10 ** (
@@ -634,15 +641,70 @@ def coverage_plot(
     if trigger_id == "plot":
         fig_data = []
 
+    # Compute 2D az-el range heatmap for inset
+    az_grid, el_grid = np.meshgrid(az_ang, el_ang)
+    az_antenna_2d = az_grid * np.cos(roll_rad) + el_grid * np.sin(roll_rad)
+    el_antenna_2d = -az_grid * np.sin(roll_rad) + el_grid * np.cos(roll_rad)
+    az_loss_2d = np.interp(
+        az_antenna_2d.ravel(), az_ang_full, az_ptn_full, left=-1000, right=-1000
+    ).reshape(az_grid.shape)
+    el_loss_2d = np.interp(
+        el_antenna_2d.ravel(), el_ang_full, el_ptn_full, left=-1000, right=-1000
+    ).reshape(el_grid.shape)
+    combined_2d = az_loss_2d + el_loss_2d
+    oov_2d = (
+        (az_antenna_2d < az_start)
+        | (az_antenna_2d > az_end)
+        | (el_antenna_2d < el_start)
+        | (el_antenna_2d > el_end)
+    )
+    combined_2d[oov_2d] = -1000
+    range_2d = max_range * 10 ** (combined_2d / 40)
+    range_2d[range_2d < 1e-6] = np.nan
+
+    # Inset position domains
+    inset_domains = {
+        "top-right": {"x": [0.72, 0.98], "y": [0.67, 0.95]},
+        "top-left": {"x": [0.04, 0.30], "y": [0.67, 0.95]},
+        "bottom-right": {"x": [0.72, 0.98], "y": [0.05, 0.33]},
+        "bottom-left": {"x": [0.04, 0.30], "y": [0.05, 0.33]},
+    }
+    show_inset = inset_position != "hidden" and inset_position in inset_domains
+    if show_inset:
+        inset_dom = inset_domains[inset_position]
+    else:
+        inset_dom = {"x": [0.04, 0.30], "y": [0.67, 0.95]}
+
+    inset_heatmap = {
+        "type": "heatmap",
+        "z": range_2d.tolist(),
+        "x": az_ang.tolist(),
+        "y": el_ang.tolist(),
+        "colorscale": "Viridis",
+        "showscale": False,
+        "hoverinfo": "x+y+z",
+        "xaxis": "x2",
+        "yaxis": "y2",
+    }
+
     if plot_type == "Azimuth Coverage":
         # With roll offset, compute antenna-frame angles for each ground azimuth
         az_antenna = az_ang * np.cos(roll_rad) + vert_misalign_angle * np.sin(roll_rad)
         el_antenna = -az_ang * np.sin(roll_rad) + vert_misalign_angle * np.cos(roll_rad)
-        az_loss = np.interp(az_antenna, az_ang_full, az_ptn_full, left=-1000, right=-1000)
-        el_loss = np.interp(el_antenna, el_ang_full, el_ptn_full, left=-1000, right=-1000)
+        az_loss = np.interp(
+            az_antenna, az_ang_full, az_ptn_full, left=-1000, right=-1000
+        )
+        el_loss = np.interp(
+            el_antenna, el_ang_full, el_ptn_full, left=-1000, right=-1000
+        )
         combined_ptn = az_loss + el_loss
         # Limit to FOV
-        out_of_fov = (az_antenna < az_start) | (az_antenna > az_end) | (el_antenna < el_start) | (el_antenna > el_end)
+        out_of_fov = (
+            (az_antenna < az_start)
+            | (az_antenna > az_end)
+            | (el_antenna < el_start)
+            | (el_antenna > el_end)
+        )
         combined_ptn[out_of_fov] = -1000
         coverage = max_range * 10 ** (combined_ptn / 40)
         coverage_long = (
@@ -661,19 +723,63 @@ def coverage_plot(
                 "name": legend,
             }
         ]
+        # Cut line for inset: horizontal line at el = misalign across az range
+        inset_cut = {
+            "type": "scatter",
+            "mode": "lines",
+            "x": [float(az_ang[0]), float(az_ang[-1])],
+            "y": [float(vert_misalign_angle), float(vert_misalign_angle)],
+            "line": {"color": "red", "width": 2},
+            "showlegend": False,
+            "hoverinfo": "skip",
+            "xaxis": "x2",
+            "yaxis": "y2",
+        }
+        new_fig.extend([inset_heatmap, inset_cut] if show_inset else [])
         fig_layout = {
-            "template": pio.templates["seaborn"],
+            "template": "seaborn",
             "margin": {"l": 60, "r": 10, "t": 30, "b": 50},
-            "xaxis": {"title": {"text": "Longitude (m)"}},
-            "yaxis": {"title": {"text": "Latitude (m)"}, "scaleanchor": "x", "scaleratio": 1},
+            "xaxis": {"title": {"text": "Longitude (m)"}, "domain": [0, 1]},
+            "yaxis": {
+                "title": {"text": "Latitude (m)"},
+                "scaleanchor": "x",
+                "scaleratio": 1,
+            },
+            "xaxis2": {
+                "domain": inset_dom["x"],
+                "anchor": "y2",
+                "showgrid": False,
+                "visible": show_inset,
+                "showline": True,
+                "mirror": True,
+                "tickfont": {"size": 9},
+            },
+            "yaxis2": {
+                "domain": inset_dom["y"],
+                "anchor": "x2",
+                "showgrid": False,
+                "visible": show_inset,
+                "showline": True,
+                "mirror": True,
+                "tickfont": {"size": 9},
+            },
         }
     elif plot_type == "Azimuth vs. Range":
         az_antenna = az_ang * np.cos(roll_rad) + vert_misalign_angle * np.sin(roll_rad)
         el_antenna = -az_ang * np.sin(roll_rad) + vert_misalign_angle * np.cos(roll_rad)
-        az_loss = np.interp(az_antenna, az_ang_full, az_ptn_full, left=-1000, right=-1000)
-        el_loss = np.interp(el_antenna, el_ang_full, el_ptn_full, left=-1000, right=-1000)
+        az_loss = np.interp(
+            az_antenna, az_ang_full, az_ptn_full, left=-1000, right=-1000
+        )
+        el_loss = np.interp(
+            el_antenna, el_ang_full, el_ptn_full, left=-1000, right=-1000
+        )
         combined_ptn = az_loss + el_loss
-        out_of_fov = (az_antenna < az_start) | (az_antenna > az_end) | (el_antenna < el_start) | (el_antenna > el_end)
+        out_of_fov = (
+            (az_antenna < az_start)
+            | (az_antenna > az_end)
+            | (el_antenna < el_start)
+            | (el_antenna > el_end)
+        )
         combined_ptn[out_of_fov] = -1000
         coverage = max_range * 10 ** (combined_ptn / 40)
         new_fig = [
@@ -686,20 +792,59 @@ def coverage_plot(
                 "name": legend,
             }
         ]
+        inset_cut = {
+            "type": "scatter",
+            "mode": "lines",
+            "x": [float(az_ang[0]), float(az_ang[-1])],
+            "y": [float(vert_misalign_angle), float(vert_misalign_angle)],
+            "line": {"color": "red", "width": 2},
+            "showlegend": False,
+            "hoverinfo": "skip",
+            "xaxis": "x2",
+            "yaxis": "y2",
+        }
+        new_fig.extend([inset_heatmap, inset_cut] if show_inset else [])
         fig_layout = {
-            "template": pio.templates["seaborn"],
+            "template": "seaborn",
             "margin": {"l": 60, "r": 10, "t": 30, "b": 50},
-            "xaxis": {"title": {"text": "Azimuth (deg)"}},
+            "xaxis": {"title": {"text": "Azimuth (deg)"}, "domain": [0, 1]},
             "yaxis": {"title": {"text": "Range (m)"}},
+            "xaxis2": {
+                "domain": inset_dom["x"],
+                "anchor": "y2",
+                "showgrid": False,
+                "visible": show_inset,
+                "showline": True,
+                "mirror": True,
+                "tickfont": {"size": 9},
+            },
+            "yaxis2": {
+                "domain": inset_dom["y"],
+                "anchor": "x2",
+                "showgrid": False,
+                "visible": show_inset,
+                "showline": True,
+                "mirror": True,
+                "tickfont": {"size": 9},
+            },
         }
     elif plot_type == "Elevation Coverage":
         # With roll offset, compute antenna-frame angles for each ground elevation
         az_antenna_el = az_offset * np.cos(roll_rad) + el_ang * np.sin(roll_rad)
         el_antenna_el = -az_offset * np.sin(roll_rad) + el_ang * np.cos(roll_rad)
-        az_loss_el = np.interp(az_antenna_el, az_ang_full, az_ptn_full, left=-1000, right=-1000)
-        el_loss_el = np.interp(el_antenna_el, el_ang_full, el_ptn_full, left=-1000, right=-1000)
+        az_loss_el = np.interp(
+            az_antenna_el, az_ang_full, az_ptn_full, left=-1000, right=-1000
+        )
+        el_loss_el = np.interp(
+            el_antenna_el, el_ang_full, el_ptn_full, left=-1000, right=-1000
+        )
         combined_ptn_el = az_loss_el + el_loss_el
-        out_of_fov = (az_antenna_el < az_start) | (az_antenna_el > az_end) | (el_antenna_el < el_start) | (el_antenna_el > el_end)
+        out_of_fov = (
+            (az_antenna_el < az_start)
+            | (az_antenna_el > az_end)
+            | (el_antenna_el < el_start)
+            | (el_antenna_el > el_end)
+        )
         combined_ptn_el[out_of_fov] = -1000
         coverage = max_range * 10 ** (combined_ptn_el / 40)
         coverage_long = (
@@ -720,19 +865,63 @@ def coverage_plot(
                 "name": legend,
             }
         ]
+        # Cut line for inset: vertical line at az = az_offset across el range
+        inset_cut = {
+            "type": "scatter",
+            "mode": "lines",
+            "x": [float(az_offset), float(az_offset)],
+            "y": [float(el_ang[0]), float(el_ang[-1])],
+            "line": {"color": "red", "width": 2},
+            "showlegend": False,
+            "hoverinfo": "skip",
+            "xaxis": "x2",
+            "yaxis": "y2",
+        }
+        new_fig.extend([inset_heatmap, inset_cut] if show_inset else [])
         fig_layout = {
-            "template": pio.templates["seaborn"],
+            "template": "seaborn",
             "margin": {"l": 60, "r": 10, "t": 30, "b": 50},
-            "xaxis": {"title": {"text": "Longitude (m)"}},
-            "yaxis": {"title": {"text": "Height (m)"}, "scaleanchor": "x", "scaleratio": 1},
+            "xaxis": {"title": {"text": "Longitude (m)"}, "domain": [0, 1]},
+            "yaxis": {
+                "title": {"text": "Height (m)"},
+                "scaleanchor": "x",
+                "scaleratio": 1,
+            },
+            "xaxis2": {
+                "domain": inset_dom["x"],
+                "anchor": "y2",
+                "showgrid": False,
+                "visible": show_inset,
+                "showline": True,
+                "mirror": True,
+                "tickfont": {"size": 9},
+            },
+            "yaxis2": {
+                "domain": inset_dom["y"],
+                "anchor": "x2",
+                "showgrid": False,
+                "visible": show_inset,
+                "showline": True,
+                "mirror": True,
+                "tickfont": {"size": 9},
+            },
         }
     elif plot_type == "Elevation vs. Range":
         az_antenna_el = az_offset * np.cos(roll_rad) + el_ang * np.sin(roll_rad)
         el_antenna_el = -az_offset * np.sin(roll_rad) + el_ang * np.cos(roll_rad)
-        az_loss_el = np.interp(az_antenna_el, az_ang_full, az_ptn_full, left=-1000, right=-1000)
-        el_loss_el = np.interp(el_antenna_el, el_ang_full, el_ptn_full, left=-1000, right=-1000)
+        az_loss_el = np.interp(
+            az_antenna_el, az_ang_full, az_ptn_full, left=-1000, right=-1000
+        )
+        el_loss_el = np.interp(
+            el_antenna_el, el_ang_full, el_ptn_full, left=-1000, right=-1000
+        )
         combined_ptn_el = az_loss_el + el_loss_el
-        out_of_fov = (az_antenna_el < az_start) | (az_antenna_el > az_end) | (el_antenna_el < el_start) | (el_antenna_el > el_end)
+        out_of_fov = (
+            (az_antenna_el < az_start)
+            | (az_antenna_el > az_end)
+            | (el_antenna_el < el_start)
+            | (el_antenna_el > el_end)
+        )
         combined_ptn_el[out_of_fov] = -1000
         coverage = max_range * 10 ** (combined_ptn_el / 40)
         new_fig = [
@@ -745,11 +934,41 @@ def coverage_plot(
                 "name": legend,
             }
         ]
+        inset_cut = {
+            "type": "scatter",
+            "mode": "lines",
+            "x": [float(az_offset), float(az_offset)],
+            "y": [float(el_ang[0]), float(el_ang[-1])],
+            "line": {"color": "red", "width": 2},
+            "showlegend": False,
+            "hoverinfo": "skip",
+            "xaxis": "x2",
+            "yaxis": "y2",
+        }
+        new_fig.extend([inset_heatmap, inset_cut] if show_inset else [])
         fig_layout = {
-            "template": pio.templates["seaborn"],
+            "template": "seaborn",
             "margin": {"l": 60, "r": 10, "t": 30, "b": 50},
-            "xaxis": {"title": {"text": "Elevation (deg)"}},
+            "xaxis": {"title": {"text": "Elevation (deg)"}, "domain": [0, 1]},
             "yaxis": {"title": {"text": "Range (m)"}},
+            "xaxis2": {
+                "domain": inset_dom["x"],
+                "anchor": "y2",
+                "showgrid": False,
+                "visible": show_inset,
+                "showline": True,
+                "mirror": True,
+                "tickfont": {"size": 9},
+            },
+            "yaxis2": {
+                "domain": inset_dom["y"],
+                "anchor": "x2",
+                "showgrid": False,
+                "visible": show_inset,
+                "showline": True,
+                "mirror": True,
+                "tickfont": {"size": 9},
+            },
         }
 
     container = []
@@ -790,10 +1009,10 @@ def coverage_plot(
     )
 
     return {
-        "fig": {
-            "data": fig_data + new_fig,
-            "layout": fig_layout,
-        },
+        "fig": go.Figure(
+            data=fig_data + new_fig,
+            layout=fig_layout,
+        ).to_dict(),
         "new_fig": new_fig,
         "property_container": container,
         "legend_entry": legend,
@@ -906,9 +1125,7 @@ def export_html(unused_n_clicks: Any, fig: Dict[str, Any]) -> Any:
     prevent_initial_call=True,
 )
 def export_data(
-    unused_n_clicks: Any,
-    data: List[Dict[str, List[float]]],
-    plot_type: str
+    unused_n_clicks: Any, data: List[Dict[str, List[float]]], plot_type: str
 ) -> Any:
     """
     Export the raw data as a CSV file.
@@ -957,10 +1174,7 @@ def export_data(
     Input("rcs-input", "value"),
     Input("rcs", "value"),
 )
-def link_rcs(
-    rcs_input: Optional[float],
-    rcs_slider: float
-) -> Tuple[float, float]:
+def link_rcs(rcs_input: Optional[float], rcs_slider: float) -> Tuple[float, float]:
     """
     Link the RCS input and slider values.
 
@@ -999,8 +1213,7 @@ def link_rcs(
     Input("fascia", "value"),
 )
 def link_fascia(
-    fascia_input: Optional[float],
-    fascia_slider: float
+    fascia_input: Optional[float], fascia_slider: float
 ) -> Tuple[float, float]:
     """
     Link the Fascia input and slider values.
@@ -1039,10 +1252,7 @@ def link_fascia(
     Input("mfg-input", "value"),
     Input("mfg", "value"),
 )
-def link_mfg(
-    mfg_input: Optional[float],
-    mfg_slider: float
-) -> Tuple[float, float]:
+def link_mfg(mfg_input: Optional[float], mfg_slider: float) -> Tuple[float, float]:
     """
     Link the Manufacturing Loss input and slider values.
 
@@ -1080,10 +1290,7 @@ def link_mfg(
     Input("temp-input", "value"),
     Input("temp", "value"),
 )
-def link_temp(
-    temp_input: Optional[float],
-    temp_slider: float
-) -> Tuple[float, float]:
+def link_temp(temp_input: Optional[float], temp_slider: float) -> Tuple[float, float]:
     """
     Link the Temperature Loss input and slider values.
 
@@ -1121,10 +1328,7 @@ def link_temp(
     Input("rain-input", "value"),
     Input("rain", "value"),
 )
-def link_rain(
-    rain_input: Optional[float],
-    rain_slider: float
-) -> Tuple[float, float]:
+def link_rain(rain_input: Optional[float], rain_slider: float) -> Tuple[float, float]:
     """
     Link the Rain Loss input and slider values.
 
@@ -1164,8 +1368,7 @@ def link_rain(
     prevent_initial_call=True,
 )
 def link_misalign(
-    misalign_input: Optional[float],
-    misalign_slider: float
+    misalign_input: Optional[float], misalign_slider: float
 ) -> Tuple[float, float]:
     """
     Link the Vertical Misalignment Angle input and slider values.
@@ -1204,10 +1407,7 @@ def link_misalign(
     Input("roll-offset-input", "value"),
     Input("roll-offset", "value"),
 )
-def link_roll(
-    roll_input: Optional[float],
-    roll_slider: float
-) -> Tuple[float, float]:
+def link_roll(roll_input: Optional[float], roll_slider: float) -> Tuple[float, float]:
     """
     Link the Roll Offset input and slider values.
 
@@ -1246,8 +1446,7 @@ def link_roll(
     Input("az-offset", "value"),
 )
 def link_azoffset(
-    azoffset_input: Optional[float],
-    az_slider: float
+    azoffset_input: Optional[float], az_slider: float
 ) -> Tuple[float, float]:
     """
     Link the Azimuth Offset input and slider values.
@@ -1286,10 +1485,7 @@ def link_azoffset(
     Input("long-input", "value"),
     Input("long", "value"),
 )
-def link_long(
-    long_input: Optional[float],
-    long_slider: float
-) -> Tuple[float, float]:
+def link_long(long_input: Optional[float], long_slider: float) -> Tuple[float, float]:
     """
     Link the Longitude Offset input and slider values.
 
@@ -1327,10 +1523,7 @@ def link_long(
     Input("lat-input", "value"),
     Input("lat", "value"),
 )
-def link_lat(
-    lat_input: Optional[float],
-    lat_slider: float
-) -> Tuple[float, float]:
+def link_lat(lat_input: Optional[float], lat_slider: float) -> Tuple[float, float]:
     """
     Link the Latitude Offset input and slider values.
 
@@ -1369,8 +1562,7 @@ def link_lat(
     Input("height", "value"),
 )
 def link_height(
-    height_input: Optional[float],
-    height_slider: float
+    height_input: Optional[float], height_slider: float
 ) -> Tuple[float, float]:
     """
     Link the Height Offset input and slider values.
@@ -1406,4 +1598,6 @@ def link_height(
 if __name__ == "__main__":
     # app.run_server(debug=True, threaded=True, processes=1, host="0.0.0.0")
 
-    FlaskUI(app=server, server="flask", port=34687, profile_dir_prefix="coverage_app").run()
+    FlaskUI(
+        app=server, server="flask", port=34687, profile_dir_prefix="coverage_app"
+    ).run()

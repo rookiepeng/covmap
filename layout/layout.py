@@ -593,6 +593,29 @@ plot_card = dbc.Card(
                                                             size="sm",
                                                             className="mb-2",
                                                         ),
+                                                        dbc.InputGroup(
+                                                            [
+                                                                dbc.InputGroupText("Inset"),
+                                                                dbc.Select(
+                                                                    id="inset-position",
+                                                                    options=[
+                                                                        {"label": "Hidden", "value": "hidden"},
+                                                                        {"label": "Top-Right", "value": "top-right"},
+                                                                        {"label": "Top-Left", "value": "top-left"},
+                                                                        {"label": "Bottom-Right", "value": "bottom-right"},
+                                                                        {"label": "Bottom-Left", "value": "bottom-left"},
+                                                                    ],
+                                                                    value="top-left",
+                                                                ),
+                                                                dbc.Tooltip(
+                                                                    "Inset heatmap position",
+                                                                    target="inset-position",
+                                                                    placement="top",
+                                                                ),
+                                                            ],
+                                                            size="sm",
+                                                            className="mb-2",
+                                                        ),
                                                         flip_checklist,
                                                     ],
                                                     title="Plot",
