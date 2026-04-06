@@ -584,8 +584,11 @@ def coverage_plot(
     roll_rad = roll_offset / 180 * np.pi
 
     # Compute misalignment loss at boresight for display purposes
+    az_at_boresight = vert_misalign_angle * np.sin(roll_rad)
     el_at_boresight = vert_misalign_angle * np.cos(roll_rad)
-    el_missalign_loss = np.interp(el_at_boresight, el_ang, el_ptn, left=-1000, right=-1000)
+    az_loss_at_boresight = np.interp(az_at_boresight, az_ang, az_ptn, left=-1000, right=-1000)
+    el_loss_at_boresight = np.interp(el_at_boresight, el_ang, el_ptn, left=-1000, right=-1000)
+    el_missalign_loss = az_loss_at_boresight + el_loss_at_boresight
 
     max_range = 10 ** (
         (
