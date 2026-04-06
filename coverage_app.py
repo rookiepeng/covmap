@@ -191,9 +191,6 @@ def upload_config(
         "misalign_min": Output("misalign", "min"),
         "misalign_max": Output("misalign", "max"),
         "misalign": Output("misalign", "value", allow_duplicate=True),
-        "misalign_input_min": Output("misalign-input", "min"),
-        "misalign_input_max": Output("misalign-input", "max"),
-        "misalign_input": Output("misalign-input", "value", allow_duplicate=True),
         "sensor_store": Output("sensor-store", "data"),
     },
     inputs={
@@ -242,9 +239,6 @@ def sensor_select(sensor: str, misalgin_state: float) -> Dict[str, Any]:
         "misalign_min": misalign_min,
         "misalign_max": misalign_max,
         "misalign": misalign,
-        "misalign_input_min": misalign_min,
-        "misalign_input_max": misalign_max,
-        "misalign_input": misalign,
         "sensor_store": sensor,
     }
 
@@ -367,23 +361,23 @@ def hold_plot(
     inputs={
         "pd": Input("pd", "value"),
         "pfa": Input("pfa", "value"),
-        "rcs": Input("rcs-input", "value"),
-        "fascia_loss": Input("fascia-input", "value"),
-        "mfg_loss": Input("mfg-input", "value"),
-        "temp_loss": Input("temp-input", "value"),
-        "rain_loss": Input("rain-input", "value"),
-        "vert_misalign_angle": Input("misalign-input", "value"),
-        "roll_offset": Input("roll-offset-input", "value"),
-        "az_offset": Input("az-offset-input", "value"),
+        "rcs": Input("rcs", "value"),
+        "fascia_loss": Input("fascia", "value"),
+        "mfg_loss": Input("mfg", "value"),
+        "temp_loss": Input("temp", "value"),
+        "rain_loss": Input("rain", "value"),
+        "vert_misalign_angle": Input("misalign", "value"),
+        "roll_offset": Input("roll-offset", "value"),
+        "az_offset": Input("az-offset", "value"),
         "sw_model": Input("integration", "value"),
         "plot_type": Input("plot", "value"),
         "fig_data": Input("figure-data", "data"),
         "new_legend_entry": Input("legend", "value"),
         "flip": Input("flip-checklist", "value"),
         "inset_position": Input("inset-position", "value"),
-        "long_offset": Input("long-input", "value"),
-        "lat_offset": Input("lat-input", "value"),
-        "height_offset": Input("height-input", "value"),
+        "long_offset": Input("long", "value"),
+        "lat_offset": Input("lat", "value"),
+        "height_offset": Input("height", "value"),
         "config": Input("config", "data"),
     },
     state={
@@ -1169,462 +1163,25 @@ def export_data(
 
 
 @app.callback(
-    Output("rcs-input", "value", allow_duplicate=True),
-    Output("rcs", "value", allow_duplicate=True),
-    Input("rcs-input", "value"),
-    Input("rcs", "value"),
-    prevent_initial_call=True,
-)
-def link_rcs(rcs_input: Optional[float], rcs_slider: float) -> Tuple[float, float]:
-    """
-    Link the RCS input and slider values.
-
-    Parameters
-    ----------
-    rcs_input : float
-        The input value of RCS
-    rcs_slider : float
-        The value of RCS selected using a slider
-
-    Returns
-    -------
-    tuple
-        A tuple containing the linked values for RCS
-
-    Raises
-    ------
-    PreventUpdate
-        If the RCS input value is None
-    """
-
-    ctx = dash.callback_context
-    trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
-
-    if trigger_id == "rcs-input" and rcs_input is None:
-        raise PreventUpdate
-
-    value = rcs_input if trigger_id == "rcs-input" else rcs_slider
-    return value, value
-
-
-@app.callback(
-    Output("fascia-input", "value", allow_duplicate=True),
-    Output("fascia", "value", allow_duplicate=True),
-    Input("fascia-input", "value"),
-    Input("fascia", "value"),
-    prevent_initial_call=True,
-)
-def link_fascia(
-    fascia_input: Optional[float], fascia_slider: float
-) -> Tuple[float, float]:
-    """
-    Link the Fascia input and slider values.
-
-    Parameters
-    ----------
-    fascia_input : float
-        The input value of Fascia
-    fascia_slider : float
-        The value of Fascia selected using a slider
-
-    Returns
-    -------
-    tuple
-        A tuple containing the linked values for Fascia
-
-    Raises
-    ------
-    PreventUpdate
-        If the Fascia input value is None
-    """
-
-    ctx = dash.callback_context
-    trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
-
-    if trigger_id == "fascia-input" and fascia_input is None:
-        raise PreventUpdate
-
-    value = fascia_input if trigger_id == "fascia-input" else fascia_slider
-    return value, value
-
-
-@app.callback(
-    Output("mfg-input", "value", allow_duplicate=True),
-    Output("mfg", "value", allow_duplicate=True),
-    Input("mfg-input", "value"),
-    Input("mfg", "value"),
-    prevent_initial_call=True,
-)
-def link_mfg(mfg_input: Optional[float], mfg_slider: float) -> Tuple[float, float]:
-    """
-    Link the Manufacturing Loss input and slider values.
-
-    Parameters
-    ----------
-    mfg_input : float
-        The input value of Manufacturing Loss
-    mfg_slider : float
-        The value of Manufacturing Loss selected using a slider
-
-    Returns
-    -------
-    tuple
-        A tuple containing the linked values for Manufacturing Loss
-
-    Raises
-    ------
-    PreventUpdate
-        If the Manufacturing Loss input value is None
-    """
-
-    ctx = dash.callback_context
-    trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
-
-    if trigger_id == "mfg-input" and mfg_input is None:
-        raise PreventUpdate
-
-    value = mfg_input if trigger_id == "mfg-input" else mfg_slider
-    return value, value
-
-
-@app.callback(
-    Output("temp-input", "value", allow_duplicate=True),
-    Output("temp", "value", allow_duplicate=True),
-    Input("temp-input", "value"),
-    Input("temp", "value"),
-    prevent_initial_call=True,
-)
-def link_temp(temp_input: Optional[float], temp_slider: float) -> Tuple[float, float]:
-    """
-    Link the Temperature Loss input and slider values.
-
-    Parameters
-    ----------
-    temp_input : float
-        The input value of Temperature Loss
-    temp_slider : float
-        The value of Temperature Loss selected using a slider
-
-    Returns
-    -------
-    tuple
-        A tuple containing the linked values for Temperature Loss
-
-    Raises
-    ------
-    PreventUpdate
-        If the Temperature Loss input value is None
-    """
-
-    ctx = dash.callback_context
-    trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
-
-    if trigger_id == "temp-input" and temp_input is None:
-        raise PreventUpdate
-
-    value = temp_input if trigger_id == "temp-input" else temp_slider
-    return value, value
-
-
-@app.callback(
-    Output("rain-input", "value", allow_duplicate=True),
-    Output("rain", "value", allow_duplicate=True),
-    Input("rain-input", "value"),
-    Input("rain", "value"),
-    prevent_initial_call=True,
-)
-def link_rain(rain_input: Optional[float], rain_slider: float) -> Tuple[float, float]:
-    """
-    Link the Rain Loss input and slider values.
-
-    Parameters
-    ----------
-    rain_input : float
-        The input value of Rain Loss
-    rain_slider : float
-        The value of Rain Loss selected using a slider
-
-    Returns
-    -------
-    tuple
-        A tuple containing the linked values for Rain Loss
-
-    Raises
-    ------
-    PreventUpdate
-        If the Rain Loss input value is None
-    """
-
-    ctx = dash.callback_context
-    trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
-
-    if trigger_id == "rain-input" and rain_input is None:
-        raise PreventUpdate
-
-    value = rain_input if trigger_id == "rain-input" else rain_slider
-    return value, value
-
-
-@app.callback(
-    Output("misalign-input", "value", allow_duplicate=True),
-    Output("misalign", "value", allow_duplicate=True),
-    Input("misalign-input", "value"),
-    Input("misalign", "value"),
-    prevent_initial_call=True,
-)
-def link_misalign(
-    misalign_input: Optional[float], misalign_slider: float
-) -> Tuple[float, float]:
-    """
-    Link the Vertical Misalignment Angle input and slider values.
-
-    Parameters
-    ----------
-    misalign_input : float
-        The input value of Vertical Misalignment Angle
-    misalign_slider : float
-        The value of Vertical Misalignment Angle selected using a slider
-
-    Returns
-    -------
-    tuple
-        A tuple containing the linked values for Vertical Misalignment Angle
-
-    Raises
-    ------
-    PreventUpdate
-        If the Vertical Misalignment Angle input value is None
-    """
-
-    ctx = dash.callback_context
-    tri_id = ctx.triggered[0]["prop_id"].split(".")[0]
-
-    if tri_id == "misalign-input" and misalign_input is None:
-        raise PreventUpdate
-
-    value = misalign_input if tri_id == "misalign-input" else misalign_slider
-    return value, value
-
-
-@app.callback(
-    Output("roll-offset-input", "value", allow_duplicate=True),
-    Output("roll-offset", "value", allow_duplicate=True),
-    Input("roll-offset-input", "value"),
-    Input("roll-offset", "value"),
-    prevent_initial_call=True,
-)
-def link_roll(roll_input: Optional[float], roll_slider: float) -> Tuple[float, float]:
-    """
-    Link the Roll Offset input and slider values.
-
-    Parameters
-    ----------
-    roll_input : float
-        The input value of Roll Offset
-    roll_slider : float
-        The value of Roll Offset selected using a slider
-
-    Returns
-    -------
-    tuple
-        A tuple containing the linked values for Roll Offset
-
-    Raises
-    ------
-    PreventUpdate
-        If the Roll Offset input value is None
-    """
-
-    ctx = dash.callback_context
-    tri_id = ctx.triggered[0]["prop_id"].split(".")[0]
-
-    if tri_id == "roll-offset-input" and roll_input is None:
-        raise PreventUpdate
-
-    value = roll_input if tri_id == "roll-offset-input" else roll_slider
-    return value, value
-
-
-@app.callback(
-    Output("az-offset-input", "value", allow_duplicate=True),
-    Output("az-offset", "value", allow_duplicate=True),
-    Input("az-offset-input", "value"),
-    Input("az-offset", "value"),
-    prevent_initial_call=True,
-)
-def link_azoffset(
-    azoffset_input: Optional[float], az_slider: float
-) -> Tuple[float, float]:
-    """
-    Link the Azimuth Offset input and slider values.
-
-    Parameters
-    ----------
-    azoffset_input : float
-        The input value of Azimuth Offset
-    az_slider : float
-        The value of Azimuth Offset selected using a slider
-
-    Returns
-    -------
-    tuple
-        A tuple containing the linked values for Azimuth Offset
-
-    Raises
-    ------
-    PreventUpdate
-        If the Azimuth Offset input value is None
-    """
-
-    ctx = dash.callback_context
-    tri_id = ctx.triggered[0]["prop_id"].split(".")[0]
-
-    if tri_id == "az-offset-input" and azoffset_input is None:
-        raise PreventUpdate
-
-    value = azoffset_input if tri_id == "az-offset-input" else az_slider
-    return value, value
-
-
-@app.callback(
-    Output("long-input", "value", allow_duplicate=True),
-    Output("long", "value", allow_duplicate=True),
-    Input("long-input", "value"),
-    Input("long", "value"),
-    prevent_initial_call=True,
-)
-def link_long(long_input: Optional[float], long_slider: float) -> Tuple[float, float]:
-    """
-    Link the Longitude Offset input and slider values.
-
-    Parameters
-    ----------
-    long_input : float
-        The input value of Longitude Offset
-    long_slider : float
-        The value of Longitude Offset selected using a slider
-
-    Returns
-    -------
-    tuple
-        A tuple containing the linked values for Longitude Offset
-
-    Raises
-    ------
-    PreventUpdate
-        If the Longitude Offset input value is None
-    """
-
-    ctx = dash.callback_context
-    trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
-
-    if trigger_id == "long-input" and long_input is None:
-        raise PreventUpdate
-
-    value = long_input if trigger_id == "long-input" else long_slider
-    return value, value
-
-
-@app.callback(
-    Output("lat-input", "value", allow_duplicate=True),
-    Output("lat", "value", allow_duplicate=True),
-    Input("lat-input", "value"),
-    Input("lat", "value"),
-    prevent_initial_call=True,
-)
-def link_lat(lat_input: Optional[float], lat_slider: float) -> Tuple[float, float]:
-    """
-    Link the Latitude Offset input and slider values.
-
-    Parameters
-    ----------
-    lat_input : float
-        The input value of Latitude Offset
-    lat_slider : float
-        The value of Latitude Offset selected using a slider
-
-    Returns
-    -------
-    tuple
-        A tuple containing the linked values for Latitude Offset
-
-    Raises
-    ------
-    PreventUpdate
-        If the Latitude Offset input value is None
-    """
-
-    ctx = dash.callback_context
-    trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
-
-    if trigger_id == "lat-input" and lat_input is None:
-        raise PreventUpdate
-
-    value = lat_input if trigger_id == "lat-input" else lat_slider
-    return value, value
-
-
-@app.callback(
-    Output("height-input", "value", allow_duplicate=True),
-    Output("height", "value", allow_duplicate=True),
-    Input("height-input", "value"),
-    Input("height", "value"),
-    prevent_initial_call=True,
-)
-def link_height(
-    height_input: Optional[float], height_slider: float
-) -> Tuple[float, float]:
-    """
-    Link the Height Offset input and slider values.
-
-    Parameters
-    ----------
-    height_input : float
-        The input value of Height Offset
-    height_slider : float
-        The value of Height Offset selected using a slider
-
-    Returns
-    -------
-    tuple
-        A tuple containing the linked values for Height Offset
-
-    Raises
-    ------
-    PreventUpdate
-        If the Height Offset input value is None
-    """
-
-    ctx = dash.callback_context
-    trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
-
-    if trigger_id == "height-input" and height_input is None:
-        raise PreventUpdate
-
-    value = height_input if trigger_id == "height-input" else height_slider
-    return value, value
-
-
-@app.callback(
     Output("app-settings", "data"),
     inputs={
         "pd": Input("pd", "value"),
         "pfa": Input("pfa", "value"),
         "integration": Input("integration", "value"),
-        "rcs": Input("rcs-input", "value"),
+        "rcs": Input("rcs", "value"),
         "plot": Input("plot", "value"),
         "inset_position": Input("inset-position", "value"),
         "flip": Input("flip-checklist", "value"),
-        "fascia": Input("fascia-input", "value"),
-        "mfg": Input("mfg-input", "value"),
-        "temp": Input("temp-input", "value"),
-        "rain": Input("rain-input", "value"),
-        "az_offset": Input("az-offset-input", "value"),
-        "misalign": Input("misalign-input", "value"),
-        "roll_offset": Input("roll-offset-input", "value"),
-        "long_offset": Input("long-input", "value"),
-        "lat_offset": Input("lat-input", "value"),
-        "height_offset": Input("height-input", "value"),
+        "fascia": Input("fascia", "value"),
+        "mfg": Input("mfg", "value"),
+        "temp": Input("temp", "value"),
+        "rain": Input("rain", "value"),
+        "az_offset": Input("az-offset", "value"),
+        "misalign": Input("misalign", "value"),
+        "roll_offset": Input("roll-offset", "value"),
+        "long_offset": Input("long", "value"),
+        "lat_offset": Input("lat", "value"),
+        "height_offset": Input("height", "value"),
         "sensor": Input("sensor", "value"),
     },
     prevent_initial_call=True,
@@ -1679,20 +1236,20 @@ def save_settings(
         "pd": Output("pd", "value", allow_duplicate=True),
         "pfa": Output("pfa", "value", allow_duplicate=True),
         "integration": Output("integration", "value", allow_duplicate=True),
-        "rcs": Output("rcs-input", "value", allow_duplicate=True),
+        "rcs": Output("rcs", "value", allow_duplicate=True),
         "plot": Output("plot", "value", allow_duplicate=True),
         "inset_position": Output("inset-position", "value", allow_duplicate=True),
         "flip": Output("flip-checklist", "value", allow_duplicate=True),
-        "fascia": Output("fascia-input", "value", allow_duplicate=True),
-        "mfg": Output("mfg-input", "value", allow_duplicate=True),
-        "temp": Output("temp-input", "value", allow_duplicate=True),
-        "rain": Output("rain-input", "value", allow_duplicate=True),
-        "az_offset": Output("az-offset-input", "value", allow_duplicate=True),
-        "misalign": Output("misalign-input", "value", allow_duplicate=True),
-        "roll_offset": Output("roll-offset-input", "value", allow_duplicate=True),
-        "long_offset": Output("long-input", "value", allow_duplicate=True),
-        "lat_offset": Output("lat-input", "value", allow_duplicate=True),
-        "height_offset": Output("height-input", "value", allow_duplicate=True),
+        "fascia": Output("fascia", "value", allow_duplicate=True),
+        "mfg": Output("mfg", "value", allow_duplicate=True),
+        "temp": Output("temp", "value", allow_duplicate=True),
+        "rain": Output("rain", "value", allow_duplicate=True),
+        "az_offset": Output("az-offset", "value", allow_duplicate=True),
+        "misalign": Output("misalign", "value", allow_duplicate=True),
+        "roll_offset": Output("roll-offset", "value", allow_duplicate=True),
+        "long_offset": Output("long", "value", allow_duplicate=True),
+        "lat_offset": Output("lat", "value", allow_duplicate=True),
+        "height_offset": Output("height", "value", allow_duplicate=True),
     },
     inputs={"unused_pathname": Input("url", "pathname")},
     prevent_initial_call="initial_duplicate",

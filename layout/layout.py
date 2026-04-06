@@ -71,21 +71,10 @@ flip_checklist = dbc.Checklist(
 # Allows adjustment of target RCS from -30 to 30 dBsm
 rcs_slider = html.Div(
     [
-        dbc.InputGroup(
-            [
-                dbc.InputGroupText("RCS"),
-                dbc.Input(
-                    id="rcs-input", type="number", value=10, min=-30, max=30, step=0.1
-                ),
-                dbc.InputGroupText("dBsm"),
-                dbc.Tooltip(
-                    "Target's RCS",
-                    target="rcs-input",
-                    placement="top",
-                ),
-            ],
-            size="sm",
-            className="mb-1",
+        html.Div(
+            [html.Span("RCS", className="fw-semibold", id="lbl-rcs"), html.Span(" (dBsm)", className="text-muted"),
+             dbc.Tooltip("Target's RCS", target="lbl-rcs", placement="top")],
+            className="small mb-1",
         ),
         dcc.Slider(
             id="rcs",
@@ -105,21 +94,10 @@ rcs_slider = html.Div(
 # Accounts for signal loss due to vehicle fascia/radome
 fascia_slider = html.Div(
     [
-        dbc.InputGroup(
-            [
-                dbc.InputGroupText("Fascia"),
-                dbc.Input(
-                    id="fascia-input", type="number", value=0, min=-10, max=0, step=0.1
-                ),
-                dbc.InputGroupText("dB"),
-                dbc.Tooltip(
-                    "Fascia loss",
-                    target="fascia-input",
-                    placement="top",
-                ),
-            ],
-            size="sm",
-            className="mb-1",
+        html.Div(
+            [html.Span("Fascia", className="fw-semibold", id="lbl-fascia"), html.Span(" (dB)", className="text-muted"),
+             dbc.Tooltip("Fascia loss", target="lbl-fascia", placement="top")],
+            className="small mb-1",
         ),
         dcc.Slider(
             id="fascia",
@@ -139,21 +117,10 @@ fascia_slider = html.Div(
 # Accounts for manufacturing variations and tolerances
 mfg_slider = html.Div(
     [
-        dbc.InputGroup(
-            [
-                dbc.InputGroupText("MFG"),
-                dbc.Input(
-                    id="mfg-input", type="number", value=0, min=-10, max=0, step=0.1
-                ),
-                dbc.InputGroupText("dB"),
-                dbc.Tooltip(
-                    "Manufacturer margin",
-                    target="mfg-input",
-                    placement="top",
-                ),
-            ],
-            size="sm",
-            className="mb-1",
+        html.Div(
+            [html.Span("MFG", className="fw-semibold", id="lbl-mfg"), html.Span(" (dB)", className="text-muted"),
+             dbc.Tooltip("Manufacturing margin", target="lbl-mfg", placement="top")],
+            className="small mb-1",
         ),
         dcc.Slider(
             id="mfg",
@@ -173,21 +140,10 @@ mfg_slider = html.Div(
 # Accounts for performance variations due to temperature
 temp_slider = html.Div(
     [
-        dbc.InputGroup(
-            [
-                dbc.InputGroupText("Temp"),
-                dbc.Input(
-                    id="temp-input", type="number", min=-10, max=0, step=0.1, value=0
-                ),
-                dbc.InputGroupText("dB"),
-                dbc.Tooltip(
-                    "Temperature loss",
-                    target="temp-input",
-                    placement="top",
-                ),
-            ],
-            size="sm",
-            className="mb-1",
+        html.Div(
+            [html.Span("Temp", className="fw-semibold", id="lbl-temp"), html.Span(" (dB)", className="text-muted"),
+             dbc.Tooltip("Temperature loss", target="lbl-temp", placement="top")],
+            className="small mb-1",
         ),
         dcc.Slider(
             id="temp",
@@ -207,21 +163,10 @@ temp_slider = html.Div(
 # Accounts for signal attenuation due to rain
 rain_slider = html.Div(
     [
-        dbc.InputGroup(
-            [
-                dbc.InputGroupText("Rain"),
-                dbc.Input(
-                    id="rain-input", type="number", min=-10, max=0, step=0.1, value=0
-                ),
-                dbc.InputGroupText("dB"),
-                dbc.Tooltip(
-                    "Rain damping loss",
-                    target="rain-input",
-                    placement="top",
-                ),
-            ],
-            size="sm",
-            className="mb-1",
+        html.Div(
+            [html.Span("Rain", className="fw-semibold", id="lbl-rain"), html.Span(" (dB)", className="text-muted"),
+             dbc.Tooltip("Rain damping loss", target="lbl-rain", placement="top")],
+            className="small mb-1",
         ),
         dcc.Slider(
             id="rain",
@@ -241,21 +186,10 @@ rain_slider = html.Div(
 # Allows adjustment for mounting angle errors
 misalign_slider = html.Div(
     [
-        dbc.InputGroup(
-            [
-                dbc.InputGroupText("Pitch offset"),
-                dbc.Input(
-                    id="misalign-input", type="number", min=-20, max=20, step=1, value=0
-                ),
-                dbc.InputGroupText("deg"),
-                dbc.Tooltip(
-                    "Pitch misalignment",
-                    target="misalign-input",
-                    placement="top",
-                ),
-            ],
-            size="sm",
-            className="mb-1",
+        html.Div(
+            [html.Span("Pitch offset", className="fw-semibold", id="lbl-misalign"), html.Span(" (deg)", className="text-muted"),
+             dbc.Tooltip("Pitch misalignment", target="lbl-misalign", placement="top")],
+            className="small mb-1",
         ),
         dcc.Slider(
             id="misalign",
@@ -275,26 +209,10 @@ misalign_slider = html.Div(
 # Allows adjustment of roll angle around boresight axis
 roll_slider = html.Div(
     [
-        dbc.InputGroup(
-            [
-                dbc.InputGroupText("Roll offset"),
-                dbc.Input(
-                    id="roll-offset-input",
-                    type="number",
-                    min=-90,
-                    max=90,
-                    step=0.5,
-                    value=0,
-                ),
-                dbc.InputGroupText("deg"),
-                dbc.Tooltip(
-                    "Roll offset around boresight",
-                    target="roll-offset-input",
-                    placement="top",
-                ),
-            ],
-            size="sm",
-            className="mb-1",
+        html.Div(
+            [html.Span("Roll offset", className="fw-semibold", id="lbl-roll"), html.Span(" (deg)", className="text-muted"),
+             dbc.Tooltip("Roll offset around boresight", target="lbl-roll", placement="top")],
+            className="small mb-1",
         ),
         dcc.Slider(
             id="roll-offset",
@@ -314,26 +232,10 @@ roll_slider = html.Div(
 # Allows adjustment of azimuth angle offset
 az_slider = html.Div(
     [
-        dbc.InputGroup(
-            [
-                dbc.InputGroupText("Yaw offset"),
-                dbc.Input(
-                    id="az-offset-input",
-                    type="number",
-                    min=-180,
-                    max=180,
-                    step=1,
-                    value=0,
-                ),
-                dbc.InputGroupText("deg"),
-                dbc.Tooltip(
-                    "Yaw offset",
-                    target="az-offset-input",
-                    placement="top",
-                ),
-            ],
-            size="sm",
-            className="mb-1",
+        html.Div(
+            [html.Span("Yaw offset", className="fw-semibold", id="lbl-az"), html.Span(" (deg)", className="text-muted"),
+             dbc.Tooltip("Yaw offset", target="lbl-az", placement="top")],
+            className="small mb-1",
         ),
         dcc.Slider(
             id="az-offset",
@@ -353,21 +255,10 @@ az_slider = html.Div(
 # Adjusts sensor position along vehicle's length
 long_slider = html.Div(
     [
-        dbc.InputGroup(
-            [
-                dbc.InputGroupText("Long"),
-                dbc.Input(
-                    id="long-input", type="number", min=-5, max=5, step=0.001, value=0
-                ),
-                dbc.InputGroupText("m"),
-                dbc.Tooltip(
-                    "Longitudinal offset",
-                    target="long-input",
-                    placement="top",
-                ),
-            ],
-            size="sm",
-            className="mb-1",
+        html.Div(
+            [html.Span("Long", className="fw-semibold", id="lbl-long"), html.Span(" (m)", className="text-muted"),
+             dbc.Tooltip("Longitudinal offset", target="lbl-long", placement="top")],
+            className="small mb-1",
         ),
         dcc.Slider(
             id="long",
@@ -387,21 +278,10 @@ long_slider = html.Div(
 # Adjusts sensor position across vehicle's width
 lat_slider = html.Div(
     [
-        dbc.InputGroup(
-            [
-                dbc.InputGroupText("Lat"),
-                dbc.Input(
-                    id="lat-input", type="number", min=-5, max=5, step=0.001, value=0
-                ),
-                dbc.InputGroupText("m"),
-                dbc.Tooltip(
-                    "Latitudinal offset",
-                    target="lat-input",
-                    placement="top",
-                ),
-            ],
-            size="sm",
-            className="mb-1",
+        html.Div(
+            [html.Span("Lat", className="fw-semibold", id="lbl-lat"), html.Span(" (m)", className="text-muted"),
+             dbc.Tooltip("Latitudinal offset", target="lbl-lat", placement="top")],
+            className="small mb-1",
         ),
         dcc.Slider(
             id="lat",
@@ -421,21 +301,10 @@ lat_slider = html.Div(
 # Adjusts sensor mounting height
 height_slider = html.Div(
     [
-        dbc.InputGroup(
-            [
-                dbc.InputGroupText("Height"),
-                dbc.Input(
-                    id="height-input", type="number", min=-5, max=5, step=0.001, value=0
-                ),
-                dbc.InputGroupText("m"),
-                dbc.Tooltip(
-                    "Height offset",
-                    target="height-input",
-                    placement="top",
-                ),
-            ],
-            size="sm",
-            className="mb-1",
+        html.Div(
+            [html.Span("Height", className="fw-semibold", id="lbl-height"), html.Span(" (m)", className="text-muted"),
+             dbc.Tooltip("Height offset", target="lbl-height", placement="top")],
+            className="small mb-1",
         ),
         dcc.Slider(
             id="height",
