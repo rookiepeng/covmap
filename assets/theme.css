@@ -1,0 +1,113 @@
+/* ── Lock page to viewport ──────────────────────────────── */
+html, body {
+    height: 100% !important;
+    overflow: hidden !important;
+    background-color: #e9ecef !important;
+}
+
+/* Make the Dash root and container fill full height */
+#react-entry-point,
+#_dash-app-content,
+.dbc {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* The row holding both cards fills all remaining space */
+.panels-row {
+    flex: 1 1 0;
+    min-height: 0;
+}
+
+/* Each column is a flex column so the card stretches */
+.panels-row > [class*="col"] {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+/* ── Left control card ──────────────────────────────────── */
+.control-card {
+    background-color: #f4f6f9;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.07);
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* ── Right chart card ───────────────────────────────────── */
+.chart-card {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.07);
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* Card body fills the card */
+.control-card > .card-body,
+.chart-card > .card-body {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+.control-card > .card-body {
+    overflow-x: hidden;
+}
+
+/* ── Accordion tweaks ───────────────────────────────────── */
+.accordion-button {
+    font-size: 0.85rem;
+    font-weight: 600;
+    background-color: #e9ecef !important;
+    color: #343a40 !important;
+    border-radius: 6px !important;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: #dde3ea !important;
+    box-shadow: none !important;
+}
+
+.accordion-item {
+    border: none !important;
+    margin-bottom: 4px;
+    border-radius: 6px !important;
+    overflow: hidden;
+}
+
+.accordion-body {
+    background-color: #f4f6f9;
+    padding: 8px 6px;
+}
+
+/* ── Responsive scrollbar on left panel ─────────────────────── */
+.control-card > .card-body ::-webkit-scrollbar {
+    width: 4px;
+}
+
+.control-card > .card-body ::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.control-card > .card-body ::-webkit-scrollbar-thumb {
+    background-color: #dee2e6;
+    border-radius: 4px;
+}
+
+.control-card > .card-body:hover ::-webkit-scrollbar-thumb {
+    background-color: #868e96;
+}
+.footer-text p {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin: 0;
+}

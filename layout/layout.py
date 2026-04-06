@@ -451,15 +451,13 @@ height_slider = html.Div(
     className="mb-3",
 )
 
-# Main plotting card containing all UI controls and the plot
-plot_card = dbc.Card(
+# Control and chart panels as separate cards
+plot_card = dbc.Row(
     [
-        dbc.CardBody(
-            [
-                dbc.Row(
+        dbc.Col(
+            dbc.Card(
+                dbc.CardBody(
                     [
-                        dbc.Col(
-                            [
                                 dbc.InputGroup(
                                     [
                                         dbc.Button(
@@ -664,16 +662,24 @@ plot_card = dbc.Card(
                                         ),
                                     ],
                                     style={
-                                        "overflow-y": "auto",
-                                        "height": "calc(88vh - 40px)",
+                                        "overflowY": "auto",
+                                        "overflowX": "hidden",
+                                        "flex": "1 1 0",
+                                        "minHeight": "0",
                                         "padding": "4px",
                                     },
                                 ),
                             ],
-                            width=3,
-                        ),
-                        dbc.Col(
-                            [
+                    className="p-2",
+                ),
+                className="control-card h-100",
+            ),
+            width=3,
+        ),
+        dbc.Col(
+            dbc.Card(
+                dbc.CardBody(
+                    [
                                 html.Div(
                                     [
                                         dbc.ButtonGroup(
@@ -711,15 +717,12 @@ plot_card = dbc.Card(
                                         "layout": {
                                             "template": pio.templates["plotly"],
                                             "uirevision": "no_change",
-                                            "xaxis": dict(
-                                                title="Number of Channels"
-                                            ),
-                                            "yaxis": dict(
-                                                title="Integration Gain (dB)"
-                                            ),
+                                            "xaxis": dict(title="Number of Channels"),
+                                            "yaxis": dict(title="Integration Gain (dB)"),
                                         },
                                     },
-                                    style={"height": "76vh"},
+                                    config={"responsive": True},
+                                    style={"flex": "1 1 0", "minHeight": "0"},
                                 ),
                                 dbc.InputGroup(
                                     [
@@ -743,16 +746,14 @@ plot_card = dbc.Card(
                                     className="mt-2",
                                 ),
                             ],
-                            width=9,
-                        ),
-                    ],
-                    className="g-3",
-                )
-            ],
-            className="mx-2 my-2",
+                    className="p-2 d-flex flex-column h-100",
+                ),
+                className="chart-card h-100",
+            ),
+            width=9,
         ),
     ],
-    className="mt-2 mb-2",
+    className="g-3 panels-row mx-1 mb-1",
 )
 
 
@@ -790,12 +791,12 @@ def get_app_layout():
             dcc.Store(id="app-settings"),
             dcc.Download(id="download"),
             plot_card,
-            # html.Hr(),
             dcc.Markdown(
                 "v5.0 | By [Zhengyu Peng](mailto:zhengyu.peng@aptiv.com)",
-                className="pb-1",
+                className="footer-text px-2",
             ),
         ],
         fluid=True,
         className="dbc",
+        style={"height": "100vh", "display": "flex", "flexDirection": "column", "overflow": "hidden", "padding": "8px"},
     )
