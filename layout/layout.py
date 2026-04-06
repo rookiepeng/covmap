@@ -487,104 +487,141 @@ plot_card = dbc.Card(
                                             dbc.Row(
                                                 id="property-container", children=[]
                                             ),
-                                            dbc.Col(html.Hr(), width=12),
-                                            dbc.InputGroup(
+                                            dbc.Accordion(
                                                 [
-                                                    dbc.InputGroupText("Pd"),
-                                                    dbc.Input(
-                                                        id="pd",
-                                                        type="number",
-                                                        value=0.5,
-                                                        min=0.01,
-                                                        max=0.9999,
-                                                        step=0.0001,
-                                                    ),
-                                                    dbc.Tooltip(
-                                                        "Probability of detection",
-                                                        target="pd",
-                                                        placement="top",
-                                                    ),
-                                                ],
-                                                size="sm",
-                                                className="mb-3",
-                                            ),
-                                            dbc.InputGroup(
-                                                [
-                                                    dbc.InputGroupText("Pfa"),
-                                                    dbc.Input(
-                                                        id="pfa",
-                                                        type="number",
-                                                        value=0.0001,
-                                                        min=0.00000000001,
-                                                        max=0.1,
-                                                        step=0.00000000001,
-                                                    ),
-                                                    dbc.Tooltip(
-                                                        "Probability of false alarm",
-                                                        target="pfa",
-                                                        placement="top",
-                                                    ),
-                                                ],
-                                                size="sm",
-                                                className="mb-3",
-                                            ),
-                                            dbc.InputGroup(
-                                                [
-                                                    dbc.InputGroupText("Target"),
-                                                    dbc.Select(
-                                                        id="integration",
-                                                        options=[
-                                                            {"label": i, "value": i}
-                                                            for i in INTEGRATION
+                                                    dbc.AccordionItem(
+                                                        [
+                                                            dbc.InputGroup(
+                                                                [
+                                                                    dbc.InputGroupText("Pd"),
+                                                                    dbc.Input(
+                                                                        id="pd",
+                                                                        type="number",
+                                                                        value=0.5,
+                                                                        min=0.01,
+                                                                        max=0.9999,
+                                                                        step=0.0001,
+                                                                    ),
+                                                                    dbc.Tooltip(
+                                                                        "Probability of detection",
+                                                                        target="pd",
+                                                                        placement="top",
+                                                                    ),
+                                                                ],
+                                                                size="sm",
+                                                                className="mb-2",
+                                                            ),
+                                                            dbc.InputGroup(
+                                                                [
+                                                                    dbc.InputGroupText("Pfa"),
+                                                                    dbc.Input(
+                                                                        id="pfa",
+                                                                        type="number",
+                                                                        value=0.0001,
+                                                                        min=0.00000000001,
+                                                                        max=0.1,
+                                                                        step=0.00000000001,
+                                                                    ),
+                                                                    dbc.Tooltip(
+                                                                        "Probability of false alarm",
+                                                                        target="pfa",
+                                                                        placement="top",
+                                                                    ),
+                                                                ],
+                                                                size="sm",
+                                                                className="mb-2",
+                                                            ),
+                                                            dbc.InputGroup(
+                                                                [
+                                                                    dbc.InputGroupText("Target"),
+                                                                    dbc.Select(
+                                                                        id="integration",
+                                                                        options=[
+                                                                            {"label": i, "value": i}
+                                                                            for i in INTEGRATION
+                                                                        ],
+                                                                        value="Swerling 3",
+                                                                    ),
+                                                                    dbc.Tooltip(
+                                                                        "Target model",
+                                                                        target="integration",
+                                                                        placement="top",
+                                                                    ),
+                                                                ],
+                                                                size="sm",
+                                                            ),
+                                                            rcs_slider,
                                                         ],
-                                                        value="Swerling 3",
+                                                        title="Detection",
+                                                        item_id="detection",
                                                     ),
-                                                    dbc.Tooltip(
-                                                        "Target model",
-                                                        target="integration",
-                                                        placement="top",
-                                                    ),
-                                                ],
-                                                size="sm",
-                                                className="mb-3",
-                                            ),
-                                            dbc.InputGroup(
-                                                [
-                                                    dbc.InputGroupText("Plot"),
-                                                    dbc.Select(
-                                                        id="plot",
-                                                        options=[
-                                                            "Azimuth Coverage",
-                                                            "Azimuth vs. Range",
-                                                            "Elevation Coverage",
-                                                            "Elevation vs. Range",
+                                                    dbc.AccordionItem(
+                                                        [
+                                                            dbc.InputGroup(
+                                                                [
+                                                                    dbc.InputGroupText("Plot"),
+                                                                    dbc.Select(
+                                                                        id="plot",
+                                                                        options=[
+                                                                            "Azimuth Coverage",
+                                                                            "Azimuth vs. Range",
+                                                                            "Elevation Coverage",
+                                                                            "Elevation vs. Range",
+                                                                        ],
+                                                                        value="Azimuth Coverage",
+                                                                    ),
+                                                                    dbc.Tooltip(
+                                                                        "Figure configuration",
+                                                                        target="plot",
+                                                                        placement="top",
+                                                                    ),
+                                                                ],
+                                                                size="sm",
+                                                                className="mb-2",
+                                                            ),
+                                                            flip_checklist,
                                                         ],
-                                                        value="Azimuth Coverage",
+                                                        title="Plot",
+                                                        item_id="plot-settings",
                                                     ),
-                                                    dbc.Tooltip(
-                                                        "Figure configuration",
-                                                        target="plot",
-                                                        placement="top",
+                                                    dbc.AccordionItem(
+                                                        [
+                                                            fascia_slider,
+                                                            mfg_slider,
+                                                            temp_slider,
+                                                            rain_slider,
+                                                        ],
+                                                        title="Losses",
+                                                        item_id="losses",
+                                                    ),
+                                                    dbc.AccordionItem(
+                                                        [
+                                                            misalign_slider,
+                                                            roll_slider,
+                                                            az_slider,
+                                                        ],
+                                                        title="Orientation",
+                                                        item_id="orientation",
+                                                    ),
+                                                    dbc.AccordionItem(
+                                                        [
+                                                            long_slider,
+                                                            lat_slider,
+                                                            height_slider,
+                                                        ],
+                                                        title="Position",
+                                                        item_id="position",
                                                     ),
                                                 ],
-                                                size="sm",
-                                            ),
-                                            flip_checklist,
-                                            dbc.Col(html.Hr()),
-                                            dbc.Form(
-                                                [
-                                                    rcs_slider,
-                                                    fascia_slider,
-                                                    mfg_slider,
-                                                    temp_slider,
-                                                    rain_slider,
-                                                    misalign_slider,
-                                                    roll_slider,
-                                                    az_slider,
-                                                    long_slider,
-                                                    lat_slider,
-                                                    height_slider,
-                                                ]
+                                                active_item=[
+                                                    "detection",
+                                                    "plot-settings",
+                                                    "losses",
+                                                    "orientation",
+                                                ],
+                                                always_open=True,
+                                                flush=True,
+                                                className="mt-2",
                                             ),
                                         ],
                                         style={
