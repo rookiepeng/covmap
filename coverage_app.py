@@ -190,10 +190,10 @@ def upload_config(
         "config": Output("config", "data"),
         "misalign_min": Output("misalign", "min"),
         "misalign_max": Output("misalign", "max"),
-        "misalign": Output("misalign", "value"),
+        "misalign": Output("misalign", "value", allow_duplicate=True),
         "misalign_input_min": Output("misalign-input", "min"),
         "misalign_input_max": Output("misalign-input", "max"),
-        "misalign_input": Output("misalign-input", "value"),
+        "misalign_input": Output("misalign-input", "value", allow_duplicate=True),
         "sensor_store": Output("sensor-store", "data"),
     },
     inputs={
@@ -1169,10 +1169,11 @@ def export_data(
 
 
 @app.callback(
-    Output("rcs-input", "value"),
-    Output("rcs", "value"),
+    Output("rcs-input", "value", allow_duplicate=True),
+    Output("rcs", "value", allow_duplicate=True),
     Input("rcs-input", "value"),
     Input("rcs", "value"),
+    prevent_initial_call=True,
 )
 def link_rcs(rcs_input: Optional[float], rcs_slider: float) -> Tuple[float, float]:
     """
@@ -1207,10 +1208,11 @@ def link_rcs(rcs_input: Optional[float], rcs_slider: float) -> Tuple[float, floa
 
 
 @app.callback(
-    Output("fascia-input", "value"),
-    Output("fascia", "value"),
+    Output("fascia-input", "value", allow_duplicate=True),
+    Output("fascia", "value", allow_duplicate=True),
     Input("fascia-input", "value"),
     Input("fascia", "value"),
+    prevent_initial_call=True,
 )
 def link_fascia(
     fascia_input: Optional[float], fascia_slider: float
@@ -1247,10 +1249,11 @@ def link_fascia(
 
 
 @app.callback(
-    Output("mfg-input", "value"),
-    Output("mfg", "value"),
+    Output("mfg-input", "value", allow_duplicate=True),
+    Output("mfg", "value", allow_duplicate=True),
     Input("mfg-input", "value"),
     Input("mfg", "value"),
+    prevent_initial_call=True,
 )
 def link_mfg(mfg_input: Optional[float], mfg_slider: float) -> Tuple[float, float]:
     """
@@ -1285,10 +1288,11 @@ def link_mfg(mfg_input: Optional[float], mfg_slider: float) -> Tuple[float, floa
 
 
 @app.callback(
-    Output("temp-input", "value"),
-    Output("temp", "value"),
+    Output("temp-input", "value", allow_duplicate=True),
+    Output("temp", "value", allow_duplicate=True),
     Input("temp-input", "value"),
     Input("temp", "value"),
+    prevent_initial_call=True,
 )
 def link_temp(temp_input: Optional[float], temp_slider: float) -> Tuple[float, float]:
     """
@@ -1323,10 +1327,11 @@ def link_temp(temp_input: Optional[float], temp_slider: float) -> Tuple[float, f
 
 
 @app.callback(
-    Output("rain-input", "value"),
-    Output("rain", "value"),
+    Output("rain-input", "value", allow_duplicate=True),
+    Output("rain", "value", allow_duplicate=True),
     Input("rain-input", "value"),
     Input("rain", "value"),
+    prevent_initial_call=True,
 )
 def link_rain(rain_input: Optional[float], rain_slider: float) -> Tuple[float, float]:
     """
@@ -1402,10 +1407,11 @@ def link_misalign(
 
 
 @app.callback(
-    Output("roll-offset-input", "value"),
-    Output("roll-offset", "value"),
+    Output("roll-offset-input", "value", allow_duplicate=True),
+    Output("roll-offset", "value", allow_duplicate=True),
     Input("roll-offset-input", "value"),
     Input("roll-offset", "value"),
+    prevent_initial_call=True,
 )
 def link_roll(roll_input: Optional[float], roll_slider: float) -> Tuple[float, float]:
     """
@@ -1440,10 +1446,11 @@ def link_roll(roll_input: Optional[float], roll_slider: float) -> Tuple[float, f
 
 
 @app.callback(
-    Output("az-offset-input", "value"),
-    Output("az-offset", "value"),
+    Output("az-offset-input", "value", allow_duplicate=True),
+    Output("az-offset", "value", allow_duplicate=True),
     Input("az-offset-input", "value"),
     Input("az-offset", "value"),
+    prevent_initial_call=True,
 )
 def link_azoffset(
     azoffset_input: Optional[float], az_slider: float
@@ -1480,10 +1487,11 @@ def link_azoffset(
 
 
 @app.callback(
-    Output("long-input", "value"),
-    Output("long", "value"),
+    Output("long-input", "value", allow_duplicate=True),
+    Output("long", "value", allow_duplicate=True),
     Input("long-input", "value"),
     Input("long", "value"),
+    prevent_initial_call=True,
 )
 def link_long(long_input: Optional[float], long_slider: float) -> Tuple[float, float]:
     """
@@ -1518,10 +1526,11 @@ def link_long(long_input: Optional[float], long_slider: float) -> Tuple[float, f
 
 
 @app.callback(
-    Output("lat-input", "value"),
-    Output("lat", "value"),
+    Output("lat-input", "value", allow_duplicate=True),
+    Output("lat", "value", allow_duplicate=True),
     Input("lat-input", "value"),
     Input("lat", "value"),
+    prevent_initial_call=True,
 )
 def link_lat(lat_input: Optional[float], lat_slider: float) -> Tuple[float, float]:
     """
@@ -1556,10 +1565,11 @@ def link_lat(lat_input: Optional[float], lat_slider: float) -> Tuple[float, floa
 
 
 @app.callback(
-    Output("height-input", "value"),
-    Output("height", "value"),
+    Output("height-input", "value", allow_duplicate=True),
+    Output("height", "value", allow_duplicate=True),
     Input("height-input", "value"),
     Input("height", "value"),
+    prevent_initial_call=True,
 )
 def link_height(
     height_input: Optional[float], height_slider: float
@@ -1593,6 +1603,130 @@ def link_height(
 
     value = height_input if trigger_id == "height-input" else height_slider
     return value, value
+
+
+@app.callback(
+    Output("app-settings", "data"),
+    inputs={
+        "pd": Input("pd", "value"),
+        "pfa": Input("pfa", "value"),
+        "integration": Input("integration", "value"),
+        "rcs": Input("rcs-input", "value"),
+        "plot": Input("plot", "value"),
+        "inset_position": Input("inset-position", "value"),
+        "flip": Input("flip-checklist", "value"),
+        "fascia": Input("fascia-input", "value"),
+        "mfg": Input("mfg-input", "value"),
+        "temp": Input("temp-input", "value"),
+        "rain": Input("rain-input", "value"),
+        "az_offset": Input("az-offset-input", "value"),
+        "misalign": Input("misalign-input", "value"),
+        "roll_offset": Input("roll-offset-input", "value"),
+        "long_offset": Input("long-input", "value"),
+        "lat_offset": Input("lat-input", "value"),
+        "height_offset": Input("height-input", "value"),
+        "sensor": Input("sensor", "value"),
+    },
+    prevent_initial_call=True,
+)
+def save_settings(
+    pd: float,
+    pfa: float,
+    integration: str,
+    rcs: float,
+    plot: str,
+    inset_position: str,
+    flip: List[str],
+    fascia: float,
+    mfg: float,
+    temp: float,
+    rain: float,
+    az_offset: float,
+    misalign: float,
+    roll_offset: float,
+    long_offset: float,
+    lat_offset: float,
+    height_offset: float,
+    sensor: str,
+) -> Dict[str, Any]:
+    data = {
+        "pd": pd,
+        "pfa": pfa,
+        "integration": integration,
+        "rcs": rcs,
+        "plot": plot,
+        "inset_position": inset_position,
+        "flip": flip,
+        "fascia": fascia,
+        "mfg": mfg,
+        "temp": temp,
+        "rain": rain,
+        "az_offset": az_offset,
+        "misalign": misalign,
+        "roll_offset": roll_offset,
+        "long_offset": long_offset,
+        "lat_offset": lat_offset,
+        "height_offset": height_offset,
+        "sensor": sensor,
+    }
+    with open("./settings.json", "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4)
+    return data
+
+
+@app.callback(
+    output={
+        "pd": Output("pd", "value", allow_duplicate=True),
+        "pfa": Output("pfa", "value", allow_duplicate=True),
+        "integration": Output("integration", "value", allow_duplicate=True),
+        "rcs": Output("rcs-input", "value", allow_duplicate=True),
+        "plot": Output("plot", "value", allow_duplicate=True),
+        "inset_position": Output("inset-position", "value", allow_duplicate=True),
+        "flip": Output("flip-checklist", "value", allow_duplicate=True),
+        "fascia": Output("fascia-input", "value", allow_duplicate=True),
+        "mfg": Output("mfg-input", "value", allow_duplicate=True),
+        "temp": Output("temp-input", "value", allow_duplicate=True),
+        "rain": Output("rain-input", "value", allow_duplicate=True),
+        "az_offset": Output("az-offset-input", "value", allow_duplicate=True),
+        "misalign": Output("misalign-input", "value", allow_duplicate=True),
+        "roll_offset": Output("roll-offset-input", "value", allow_duplicate=True),
+        "long_offset": Output("long-input", "value", allow_duplicate=True),
+        "lat_offset": Output("lat-input", "value", allow_duplicate=True),
+        "height_offset": Output("height-input", "value", allow_duplicate=True),
+    },
+    inputs={"unused_pathname": Input("url", "pathname")},
+    prevent_initial_call="initial_duplicate",
+)
+def load_settings(
+    unused_pathname: str,
+) -> Dict[str, Any]:
+    defaults: Dict[str, Any] = {
+        "pd": 0.5,
+        "pfa": 0.0001,
+        "integration": "Swerling 3",
+        "rcs": 10,
+        "plot": "Azimuth Coverage",
+        "inset_position": "top-left",
+        "flip": [],
+        "fascia": 0,
+        "mfg": 0,
+        "temp": 0,
+        "rain": 0,
+        "az_offset": 0,
+        "misalign": 0,
+        "roll_offset": 0,
+        "long_offset": 0,
+        "lat_offset": 0,
+        "height_offset": 0,
+    }
+    if os.path.exists("./settings.json"):
+        try:
+            with open("./settings.json", "r", encoding="utf-8") as f:
+                saved = json.load(f)
+            defaults.update({k: v for k, v in saved.items() if v is not None and k in defaults})
+        except (json.JSONDecodeError, OSError):
+            pass
+    return defaults
 
 
 if __name__ == "__main__":

@@ -10,6 +10,9 @@ from dash import html
 
 import dash_bootstrap_components as dbc
 
+import json
+import os
+
 import plotly.io as pio
 
 
@@ -768,12 +771,23 @@ def get_app_layout():
 
     The layout is responsive and uses Bootstrap's fluid container system.
     """
+    saved_sensor = None
+    if os.path.exists("./settings.json"):
+        try:
+            with open("./settings.json", "r", encoding="utf-8") as f:
+                _s = json.load(f)
+            saved_sensor = _s.get("sensor")
+        except (json.JSONDecodeError, OSError):
+            pass
+
     return dbc.Container(
         [
+            dcc.Location(id="url", refresh=False),
             dcc.Store(id="config"),
             dcc.Store(id="figure-data", data=[]),
             dcc.Store(id="new-figure-data", data=[]),
-            dcc.Store(id="sensor-store", data=[], storage_type="local"),
+            dcc.Store(id="sensor-store", data=saved_sensor),
+            dcc.Store(id="app-settings"),
             dcc.Download(id="download"),
             plot_card,
             # html.Hr(),
