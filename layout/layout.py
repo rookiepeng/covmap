@@ -92,7 +92,7 @@ rcs_slider = html.Div(
             value=10,
             marks=None,
             updatemode="drag",
-            tooltip={"always_visible": False, "placement": "left"},
+            tooltip={"always_visible": False, "placement": "top"},
         ),
     ],
 )
@@ -125,7 +125,7 @@ fascia_slider = html.Div(
             value=0,
             marks=None,
             updatemode="drag",
-            tooltip={"always_visible": False, "placement": "left"},
+            tooltip={"always_visible": False, "placement": "top"},
         ),
     ],
 )
@@ -158,7 +158,7 @@ mfg_slider = html.Div(
             value=0,
             marks=None,
             updatemode="drag",
-            tooltip={"always_visible": False, "placement": "left"},
+            tooltip={"always_visible": False, "placement": "top"},
         ),
     ],
 )
@@ -191,7 +191,7 @@ temp_slider = html.Div(
             value=0,
             marks=None,
             updatemode="drag",
-            tooltip={"always_visible": False, "placement": "left"},
+            tooltip={"always_visible": False, "placement": "top"},
         ),
     ],
 )
@@ -224,7 +224,7 @@ rain_slider = html.Div(
             value=0,
             marks=None,
             updatemode="drag",
-            tooltip={"always_visible": False, "placement": "left"},
+            tooltip={"always_visible": False, "placement": "top"},
         ),
     ],
 )
@@ -257,7 +257,7 @@ misalign_slider = html.Div(
             value=0,
             marks=None,
             updatemode="drag",
-            tooltip={"always_visible": False, "placement": "left"},
+            tooltip={"always_visible": False, "placement": "top"},
         ),
     ],
 )
@@ -295,7 +295,7 @@ roll_slider = html.Div(
             value=0,
             marks=None,
             updatemode="drag",
-            tooltip={"always_visible": False, "placement": "left"},
+            tooltip={"always_visible": False, "placement": "top"},
         ),
     ],
 )
@@ -333,7 +333,7 @@ az_slider = html.Div(
             value=0,
             marks=None,
             updatemode="drag",
-            tooltip={"always_visible": False, "placement": "left"},
+            tooltip={"always_visible": False, "placement": "top"},
         ),
     ],
 )
@@ -366,7 +366,7 @@ long_slider = html.Div(
             value=0,
             marks=None,
             updatemode="drag",
-            tooltip={"always_visible": False, "placement": "left"},
+            tooltip={"always_visible": False, "placement": "top"},
         ),
     ],
 )
@@ -399,7 +399,7 @@ lat_slider = html.Div(
             value=0,
             marks=None,
             updatemode="drag",
-            tooltip={"always_visible": False, "placement": "left"},
+            tooltip={"always_visible": False, "placement": "top"},
         ),
     ],
 )
@@ -432,7 +432,7 @@ height_slider = html.Div(
             value=0,
             marks=None,
             updatemode="drag",
-            tooltip={"always_visible": False, "placement": "left"},
+            tooltip={"always_visible": False, "placement": "top"},
         ),
     ],
 )
@@ -445,278 +445,278 @@ plot_card = dbc.Card(
                 dbc.Row(
                     [
                         dbc.Col(
-                            dbc.Row(
-                                [
-                                    dbc.InputGroup(
-                                        [
-                                            dbc.Button(
-                                                html.I(className="bi bi-record-circle"),
-                                                id="reload",
-                                                n_clicks=0,
-                                                color="primary",
-                                                disabled=False,
+                            [
+                                dbc.InputGroup(
+                                    [
+                                        dbc.Button(
+                                            html.I(className="bi bi-record-circle"),
+                                            id="reload",
+                                            n_clicks=0,
+                                            color="primary",
+                                            disabled=False,
+                                        ),
+                                        dbc.Select(id="sensor"),
+                                        dbc.Tooltip(
+                                            "Pick a sensor",
+                                            target="sensor",
+                                            placement="top",
+                                        ),
+                                        dcc.Upload(
+                                            id="upload-config",
+                                            children=dbc.Button(
+                                                html.I(className="bi bi-upload"),
+                                                color="success",
+                                                style={
+                                                    "border-top-left-radius": "0",
+                                                    "border-bottom-left-radius": "0",
+                                                },
                                             ),
-                                            dbc.Select(id="sensor"),
-                                            dbc.Tooltip(
-                                                "Pick a sensor",
-                                                target="sensor",
-                                                placement="top",
-                                            ),
-                                            dcc.Upload(
-                                                id="upload-config",
-                                                children=dbc.Button(
-                                                    html.I(className="bi bi-upload"),
-                                                    color="success",
-                                                    style={
-                                                        "border-top-left-radius": "0",
-                                                        "border-bottom-left-radius": "0",
-                                                    },
+                                            accept="application/json",
+                                        ),
+                                        dbc.Tooltip(
+                                            "Upload a new sensor configuration",
+                                            target="upload-config",
+                                            placement="top",
+                                        ),
+                                    ],
+                                    className="mb-2",
+                                    size="sm",
+                                ),
+                                html.Div(
+                                    [
+                                        dbc.Row(
+                                            id="property-container",
+                                            children=[],
+                                            className="mb-3",
+                                        ),
+                                        dbc.Accordion(
+                                            [
+                                                dbc.AccordionItem(
+                                                    [
+                                                        dbc.InputGroup(
+                                                            [
+                                                                dbc.InputGroupText("Pd"),
+                                                                dbc.Input(
+                                                                    id="pd",
+                                                                    type="number",
+                                                                    value=0.5,
+                                                                    min=0.01,
+                                                                    max=0.9999,
+                                                                    step=0.0001,
+                                                                ),
+                                                                dbc.Tooltip(
+                                                                    "Probability of detection",
+                                                                    target="pd",
+                                                                    placement="top",
+                                                                ),
+                                                            ],
+                                                            size="sm",
+                                                            className="mb-2",
+                                                        ),
+                                                        dbc.InputGroup(
+                                                            [
+                                                                dbc.InputGroupText("Pfa"),
+                                                                dbc.Input(
+                                                                    id="pfa",
+                                                                    type="number",
+                                                                    value=0.0001,
+                                                                    min=0.00000000001,
+                                                                    max=0.1,
+                                                                    step=0.00000000001,
+                                                                ),
+                                                                dbc.Tooltip(
+                                                                    "Probability of false alarm",
+                                                                    target="pfa",
+                                                                    placement="top",
+                                                                ),
+                                                            ],
+                                                            size="sm",
+                                                            className="mb-2",
+                                                        ),
+                                                        dbc.InputGroup(
+                                                            [
+                                                                dbc.InputGroupText("Target"),
+                                                                dbc.Select(
+                                                                    id="integration",
+                                                                    options=[
+                                                                        {"label": i, "value": i}
+                                                                        for i in INTEGRATION
+                                                                    ],
+                                                                    value="Swerling 3",
+                                                                ),
+                                                                dbc.Tooltip(
+                                                                    "Target model",
+                                                                    target="integration",
+                                                                    placement="top",
+                                                                ),
+                                                            ],
+                                                            size="sm",
+                                                            className="mb-2",
+                                                        ),
+                                                        rcs_slider,
+                                                    ],
+                                                    title="Detection",
+                                                    item_id="detection",
                                                 ),
-                                                accept="application/json",
-                                            ),
-                                            dbc.Tooltip(
-                                                "Upload a new sensor configuration",
-                                                target="upload-config",
-                                                placement="top",
-                                            ),
-                                        ],
-                                        className="mb-3",
-                                    ),
-                                    html.Div(
-                                        [
-                                            dbc.Row(
-                                                id="property-container", children=[]
-                                            ),
-                                            dbc.Accordion(
-                                                [
-                                                    dbc.AccordionItem(
-                                                        [
-                                                            dbc.InputGroup(
-                                                                [
-                                                                    dbc.InputGroupText("Pd"),
-                                                                    dbc.Input(
-                                                                        id="pd",
-                                                                        type="number",
-                                                                        value=0.5,
-                                                                        min=0.01,
-                                                                        max=0.9999,
-                                                                        step=0.0001,
-                                                                    ),
-                                                                    dbc.Tooltip(
-                                                                        "Probability of detection",
-                                                                        target="pd",
-                                                                        placement="top",
-                                                                    ),
-                                                                ],
-                                                                size="sm",
-                                                                className="mb-2",
-                                                            ),
-                                                            dbc.InputGroup(
-                                                                [
-                                                                    dbc.InputGroupText("Pfa"),
-                                                                    dbc.Input(
-                                                                        id="pfa",
-                                                                        type="number",
-                                                                        value=0.0001,
-                                                                        min=0.00000000001,
-                                                                        max=0.1,
-                                                                        step=0.00000000001,
-                                                                    ),
-                                                                    dbc.Tooltip(
-                                                                        "Probability of false alarm",
-                                                                        target="pfa",
-                                                                        placement="top",
-                                                                    ),
-                                                                ],
-                                                                size="sm",
-                                                                className="mb-2",
-                                                            ),
-                                                            dbc.InputGroup(
-                                                                [
-                                                                    dbc.InputGroupText("Target"),
-                                                                    dbc.Select(
-                                                                        id="integration",
-                                                                        options=[
-                                                                            {"label": i, "value": i}
-                                                                            for i in INTEGRATION
-                                                                        ],
-                                                                        value="Swerling 3",
-                                                                    ),
-                                                                    dbc.Tooltip(
-                                                                        "Target model",
-                                                                        target="integration",
-                                                                        placement="top",
-                                                                    ),
-                                                                ],
-                                                                size="sm",
-                                                            ),
-                                                            rcs_slider,
-                                                        ],
-                                                        title="Detection",
-                                                        item_id="detection",
-                                                    ),
-                                                    dbc.AccordionItem(
-                                                        [
-                                                            dbc.InputGroup(
-                                                                [
-                                                                    dbc.InputGroupText("Plot"),
-                                                                    dbc.Select(
-                                                                        id="plot",
-                                                                        options=[
-                                                                            "Azimuth Coverage",
-                                                                            "Azimuth vs. Range",
-                                                                            "Elevation Coverage",
-                                                                            "Elevation vs. Range",
-                                                                        ],
-                                                                        value="Azimuth Coverage",
-                                                                    ),
-                                                                    dbc.Tooltip(
-                                                                        "Figure configuration",
-                                                                        target="plot",
-                                                                        placement="top",
-                                                                    ),
-                                                                ],
-                                                                size="sm",
-                                                                className="mb-2",
-                                                            ),
-                                                            flip_checklist,
-                                                        ],
-                                                        title="Plot",
-                                                        item_id="plot-settings",
-                                                    ),
-                                                    dbc.AccordionItem(
-                                                        [
-                                                            fascia_slider,
-                                                            mfg_slider,
-                                                            temp_slider,
-                                                            rain_slider,
-                                                        ],
-                                                        title="Losses",
-                                                        item_id="losses",
-                                                    ),
-                                                    dbc.AccordionItem(
-                                                        [
-                                                            misalign_slider,
-                                                            roll_slider,
-                                                            az_slider,
-                                                        ],
-                                                        title="Orientation",
-                                                        item_id="orientation",
-                                                    ),
-                                                    dbc.AccordionItem(
-                                                        [
-                                                            long_slider,
-                                                            lat_slider,
-                                                            height_slider,
-                                                        ],
-                                                        title="Position",
-                                                        item_id="position",
-                                                    ),
-                                                ],
-                                                active_item=[
-                                                    "detection",
-                                                    "plot-settings",
-                                                    "losses",
-                                                    "orientation",
-                                                ],
-                                                always_open=True,
-                                                flush=True,
-                                                className="mt-2",
-                                            ),
-                                        ],
-                                        style={
-                                            "overflow-y": "scroll",
-                                            "height": "82vh",
-                                        },
-                                    ),
-                                ]
-                            ),
+                                                dbc.AccordionItem(
+                                                    [
+                                                        dbc.InputGroup(
+                                                            [
+                                                                dbc.InputGroupText("Plot"),
+                                                                dbc.Select(
+                                                                    id="plot",
+                                                                    options=[
+                                                                        "Azimuth Coverage",
+                                                                        "Azimuth vs. Range",
+                                                                        "Elevation Coverage",
+                                                                        "Elevation vs. Range",
+                                                                    ],
+                                                                    value="Azimuth Coverage",
+                                                                ),
+                                                                dbc.Tooltip(
+                                                                    "Figure configuration",
+                                                                    target="plot",
+                                                                    placement="top",
+                                                                ),
+                                                            ],
+                                                            size="sm",
+                                                            className="mb-2",
+                                                        ),
+                                                        flip_checklist,
+                                                    ],
+                                                    title="Plot",
+                                                    item_id="plot-settings",
+                                                ),
+                                                dbc.AccordionItem(
+                                                    [
+                                                        fascia_slider,
+                                                        mfg_slider,
+                                                        temp_slider,
+                                                        rain_slider,
+                                                    ],
+                                                    title="Losses",
+                                                    item_id="losses",
+                                                ),
+                                                dbc.AccordionItem(
+                                                    [
+                                                        misalign_slider,
+                                                        roll_slider,
+                                                        az_slider,
+                                                    ],
+                                                    title="Orientation",
+                                                    item_id="orientation",
+                                                ),
+                                                dbc.AccordionItem(
+                                                    [
+                                                        long_slider,
+                                                        lat_slider,
+                                                        height_slider,
+                                                    ],
+                                                    title="Position",
+                                                    item_id="position",
+                                                ),
+                                            ],
+                                            active_item=[
+                                                "detection",
+                                                "plot-settings",
+                                                "losses",
+                                                "orientation",
+                                            ],
+                                            always_open=True,
+                                            flush=False,
+                                        ),
+                                    ],
+                                    style={
+                                        "overflow-y": "auto",
+                                        "height": "calc(88vh - 40px)",
+                                        "padding": "4px",
+                                    },
+                                ),
+                            ],
                             width=3,
                         ),
                         dbc.Col(
-                            dbc.Row(
-                                [
-                                    dbc.Col(
+                            [
+                                html.Div(
+                                    [
                                         dbc.ButtonGroup(
                                             [
                                                 dbc.Button(
-                                                    "Clear last held plot",
+                                                    "Clear last held",
                                                     id="clear-last-plot",
                                                     n_clicks=0,
                                                     color="warning",
-                                                    class_name="my-1",
+                                                    size="sm",
                                                 ),
                                                 dbc.Button(
-                                                    "Clear all held plots",
+                                                    "Clear all held",
                                                     id="clear-plot",
                                                     n_clicks=0,
                                                     color="danger",
-                                                    class_name="my-1",
+                                                    size="sm",
                                                 ),
                                             ],
-                                            style={"float": "right"},
                                         ),
-                                        width={"size": 6, "offset": 6},
-                                    ),
-                                    dcc.Graph(
-                                        id="scatter",
-                                        figure={
-                                            "data": [
-                                                {
-                                                    "mode": "lines",
-                                                    "type": "scatter",
-                                                    "x": [],
-                                                    "y": [],
-                                                }
-                                            ],
-                                            "layout": {
-                                                "template": pio.templates["plotly"],
-                                                "uirevision": "no_change",
-                                                "xaxis": dict(
-                                                    title="Number of Channels"
-                                                ),
-                                                "yaxis": dict(
-                                                    title="Integration Gain (dB)"
-                                                ),
-                                            },
-                                        },
-                                        style={"height": "76vh"},
-                                    ),
-                                    dbc.Col(html.Hr()),
-                                    dbc.InputGroup(
-                                        [
-                                            dbc.InputGroupText("Legend"),
-                                            dbc.Input(
-                                                id="legend",
-                                                placeholder="Figure legend",
-                                                type="text",
-                                            ),
-                                            dbc.Button(
-                                                "Hold plot",
-                                                id="hold-plot",
-                                                color="success",
-                                                n_clicks=0,
-                                            ),
-                                            dbc.DropdownMenu(
-                                                export_menu_items,
-                                                label="Export",
-                                                color="info",
-                                            ),
+                                    ],
+                                    className="d-flex justify-content-end mb-1",
+                                ),
+                                dcc.Graph(
+                                    id="scatter",
+                                    figure={
+                                        "data": [
+                                            {
+                                                "mode": "lines",
+                                                "type": "scatter",
+                                                "x": [],
+                                                "y": [],
+                                            }
                                         ],
-                                        className="mt-3",
-                                    ),
-                                ]
-                            ),
+                                        "layout": {
+                                            "template": pio.templates["plotly"],
+                                            "uirevision": "no_change",
+                                            "xaxis": dict(
+                                                title="Number of Channels"
+                                            ),
+                                            "yaxis": dict(
+                                                title="Integration Gain (dB)"
+                                            ),
+                                        },
+                                    },
+                                    style={"height": "76vh"},
+                                ),
+                                dbc.InputGroup(
+                                    [
+                                        dbc.InputGroupText("Legend"),
+                                        dbc.Input(
+                                            id="legend",
+                                            placeholder="Figure legend",
+                                            type="text",
+                                        ),
+                                        dbc.Button(
+                                            "Hold plot",
+                                            id="hold-plot",
+                                            color="success",
+                                            n_clicks=0,
+                                        ),
+                                        dbc.DropdownMenu(
+                                            export_menu_items,
+                                            label="Export",
+                                            color="info",
+                                        ),
+                                    ],
+                                    className="mt-2",
+                                ),
+                            ],
                             width=9,
                         ),
                     ],
-                    class_name="g-5",
+                    className="g-3",
                 )
             ],
-            class_name="mx-3 my-3",
+            className="mx-2 my-2",
         ),
     ],
-    class_name="mt-2 mb-2",
+    className="mt-2 mb-2",
 )
 
 
@@ -750,5 +750,5 @@ def get_app_layout():
             ),
         ],
         fluid=True,
-        className="dbc_light",
+        className="dbc",
     )
