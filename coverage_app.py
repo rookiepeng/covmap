@@ -551,30 +551,32 @@ def coverage_plot(
     extra_gain_loss = config.get("extra_proc_gain_loss", 0)
 
     # normalize azimuth pattern based on chamber angle
-    az_ptn = np.array(config["az_ptn"])
-    az_ang = np.array(config["az_ang"])
-    az_ptn = az_ptn - az_ptn[np.where(az_ang == chamber_az)]
+    az_ptn_full = np.array(config["az_ptn"])
+    az_ang_full = np.array(config["az_ang"])
+    az_ptn_full = az_ptn_full - az_ptn_full[np.where(az_ang_full == chamber_az)]
     if flip_az:
-        az_ptn = np.flip(az_ptn)
-        az_ang = np.flip(-az_ang)
+        az_ptn_full = np.flip(az_ptn_full)
+        az_ang_full = np.flip(-az_ang_full)
 
-    idx = np.where(np.logical_and(az_ang >= az_start - 1, az_ang <= az_end + 1))
-    az_ang = az_ang[idx]
-    az_ptn = az_ptn[idx]
+    # Trimmed arrays with edge clamping for sweep/display
+    idx = np.where(np.logical_and(az_ang_full >= az_start - 1, az_ang_full <= az_end + 1))
+    az_ang = az_ang_full[idx]
+    az_ptn = az_ptn_full[idx].copy()
     az_ptn[0] = -1000
     az_ptn[-1] = -1000
 
     # normalize elevation pattern based on chamber angle
-    el_ptn = np.array(config["el_ptn"])
-    el_ang = np.array(config["el_ang"])
-    el_ptn = el_ptn - el_ptn[np.where(el_ang == chamber_el)]
+    el_ptn_full = np.array(config["el_ptn"])
+    el_ang_full = np.array(config["el_ang"])
+    el_ptn_full = el_ptn_full - el_ptn_full[np.where(el_ang_full == chamber_el)]
     if flip_el:
-        el_ptn = np.flip(el_ptn)
-        el_ang = np.flip(-el_ang)
+        el_ptn_full = np.flip(el_ptn_full)
+        el_ang_full = np.flip(-el_ang_full)
 
-    idx = np.where(np.logical_and(el_ang >= el_start - 1, el_ang <= el_end + 1))
-    el_ang = el_ang[idx]
-    el_ptn = el_ptn[idx]
+    # Trimmed arrays with edge clamping for sweep/display
+    idx = np.where(np.logical_and(el_ang_full >= el_start - 1, el_ang_full <= el_end + 1))
+    el_ang = el_ang_full[idx]
+    el_ptn = el_ptn_full[idx].copy()
     el_ptn[0] = -1000
     el_ptn[-1] = -1000
 
@@ -586,8 +588,8 @@ def coverage_plot(
     # Compute misalignment loss at boresight for display purposes
     az_at_boresight = vert_misalign_angle * np.sin(roll_rad)
     el_at_boresight = vert_misalign_angle * np.cos(roll_rad)
-    az_loss_at_boresight = np.interp(az_at_boresight, az_ang, az_ptn, left=-1000, right=-1000)
-    el_loss_at_boresight = np.interp(el_at_boresight, el_ang, el_ptn, left=-1000, right=-1000)
+    az_loss_at_boresight = np.interp(az_at_boresight, az_ang_full, az_ptn_full, left=-1000, right=-1000)
+    el_loss_at_boresight = np.interp(el_at_boresight, el_ang_full, el_ptn_full, left=-1000, right=-1000)
     el_missalign_loss = az_loss_at_boresight + el_loss_at_boresight
 
     max_range = 10 ** (
@@ -636,9 +638,12 @@ def coverage_plot(
         # With roll offset, compute antenna-frame angles for each ground azimuth
         az_antenna = az_ang * np.cos(roll_rad) + vert_misalign_angle * np.sin(roll_rad)
         el_antenna = -az_ang * np.sin(roll_rad) + vert_misalign_angle * np.cos(roll_rad)
-        az_loss = np.interp(az_antenna, az_ang, az_ptn, left=-1000, right=-1000)
-        el_loss = np.interp(el_antenna, el_ang, el_ptn, left=-1000, right=-1000)
+        az_loss = np.interp(az_antenna, az_ang_full, az_ptn_full, left=-1000, right=-1000)
+        el_loss = np.interp(el_antenna, el_ang_full, el_ptn_full, left=-1000, right=-1000)
         combined_ptn = az_loss + el_loss
+        # Limit to FOV
+        out_of_fov = (az_antenna < az_start) | (az_antenna > az_end) | (el_antenna < el_start) | (el_antenna > el_end)
+        combined_ptn[out_of_fov] = -1000
         coverage = max_range * 10 ** (combined_ptn / 40)
         coverage_long = (
             coverage * np.cos((az_ang + az_offset) / 180 * np.pi) + long_offset
@@ -665,9 +670,11 @@ def coverage_plot(
     elif plot_type == "Azimuth vs. Range":
         az_antenna = az_ang * np.cos(roll_rad) + vert_misalign_angle * np.sin(roll_rad)
         el_antenna = -az_ang * np.sin(roll_rad) + vert_misalign_angle * np.cos(roll_rad)
-        az_loss = np.interp(az_antenna, az_ang, az_ptn, left=-1000, right=-1000)
-        el_loss = np.interp(el_antenna, el_ang, el_ptn, left=-1000, right=-1000)
+        az_loss = np.interp(az_antenna, az_ang_full, az_ptn_full, left=-1000, right=-1000)
+        el_loss = np.interp(el_antenna, el_ang_full, el_ptn_full, left=-1000, right=-1000)
         combined_ptn = az_loss + el_loss
+        out_of_fov = (az_antenna < az_start) | (az_antenna > az_end) | (el_antenna < el_start) | (el_antenna > el_end)
+        combined_ptn[out_of_fov] = -1000
         coverage = max_range * 10 ** (combined_ptn / 40)
         new_fig = [
             {
@@ -689,9 +696,11 @@ def coverage_plot(
         # With roll offset, compute antenna-frame angles for each ground elevation
         az_antenna_el = az_offset * np.cos(roll_rad) + el_ang * np.sin(roll_rad)
         el_antenna_el = -az_offset * np.sin(roll_rad) + el_ang * np.cos(roll_rad)
-        az_loss_el = np.interp(az_antenna_el, az_ang, az_ptn, left=-1000, right=-1000)
-        el_loss_el = np.interp(el_antenna_el, el_ang, el_ptn, left=-1000, right=-1000)
+        az_loss_el = np.interp(az_antenna_el, az_ang_full, az_ptn_full, left=-1000, right=-1000)
+        el_loss_el = np.interp(el_antenna_el, el_ang_full, el_ptn_full, left=-1000, right=-1000)
         combined_ptn_el = az_loss_el + el_loss_el
+        out_of_fov = (az_antenna_el < az_start) | (az_antenna_el > az_end) | (el_antenna_el < el_start) | (el_antenna_el > el_end)
+        combined_ptn_el[out_of_fov] = -1000
         coverage = max_range * 10 ** (combined_ptn_el / 40)
         coverage_long = (
             coverage * np.cos((el_ang + vert_misalign_angle) / 180 * np.pi)
@@ -720,9 +729,11 @@ def coverage_plot(
     elif plot_type == "Elevation vs. Range":
         az_antenna_el = az_offset * np.cos(roll_rad) + el_ang * np.sin(roll_rad)
         el_antenna_el = -az_offset * np.sin(roll_rad) + el_ang * np.cos(roll_rad)
-        az_loss_el = np.interp(az_antenna_el, az_ang, az_ptn, left=-1000, right=-1000)
-        el_loss_el = np.interp(el_antenna_el, el_ang, el_ptn, left=-1000, right=-1000)
+        az_loss_el = np.interp(az_antenna_el, az_ang_full, az_ptn_full, left=-1000, right=-1000)
+        el_loss_el = np.interp(el_antenna_el, el_ang_full, el_ptn_full, left=-1000, right=-1000)
         combined_ptn_el = az_loss_el + el_loss_el
+        out_of_fov = (az_antenna_el < az_start) | (az_antenna_el > az_end) | (el_antenna_el < el_start) | (el_antenna_el > el_end)
+        combined_ptn_el[out_of_fov] = -1000
         coverage = max_range * 10 ** (combined_ptn_el / 40)
         new_fig = [
             {
