@@ -617,17 +617,17 @@ def coverage_plot(
             str(rcs)
             + " dBsm, "
             + sw_model
-            + ", "
+            + ",<br>"
             + str(abs(fascia_loss))
-            + " dB Fascia Loss, "
+            + " dB Fascia Loss,<br>"
             + str(abs(temp_loss))
             + " dB Temp Loss,<br>"
             + str(abs(rain_loss))
-            + " dB Rain Loss, "
+            + " dB Rain Loss,<br>"
             + str(abs(mfg_loss))
-            + " dB MFG, "
+            + " dB MFG,<br>"
             + str(vert_misalign_angle)
-            + " deg Misalignment"
+            + " deg Misalignment<br>"
         )
 
     # clear all the held plots if the plot type is changed
@@ -663,9 +663,9 @@ def coverage_plot(
         ]
         fig_layout = {
             "template": pio.templates["seaborn"],
-            "margin": {"l": 20, "r": 5, "t": 30, "b": 20},
-            "xaxis": {"title": "Longitude (m)"},
-            "yaxis": {"title": "Latitude (m)", "scaleanchor": "x", "scaleratio": 1},
+            "margin": {"l": 60, "r": 10, "t": 30, "b": 50},
+            "xaxis": {"title": {"text": "Longitude (m)"}},
+            "yaxis": {"title": {"text": "Latitude (m)"}, "scaleanchor": "x", "scaleratio": 1},
         }
     elif plot_type == "Azimuth vs. Range":
         az_antenna = az_ang * np.cos(roll_rad) + vert_misalign_angle * np.sin(roll_rad)
@@ -688,9 +688,9 @@ def coverage_plot(
         ]
         fig_layout = {
             "template": pio.templates["seaborn"],
-            "margin": {"l": 20, "r": 5, "t": 30, "b": 20},
-            "xaxis": {"title": "Azimuth (deg)"},
-            "yaxis": {"title": "Range (m)"},
+            "margin": {"l": 60, "r": 10, "t": 30, "b": 50},
+            "xaxis": {"title": {"text": "Azimuth (deg)"}},
+            "yaxis": {"title": {"text": "Range (m)"}},
         }
     elif plot_type == "Elevation Coverage":
         # With roll offset, compute antenna-frame angles for each ground elevation
@@ -722,9 +722,9 @@ def coverage_plot(
         ]
         fig_layout = {
             "template": pio.templates["seaborn"],
-            "margin": {"l": 20, "r": 5, "t": 30, "b": 20},
-            "xaxis": {"title": "Longitude (m)"},
-            "yaxis": {"title": "Height (m)", "scaleanchor": "x", "scaleratio": 1},
+            "margin": {"l": 60, "r": 10, "t": 30, "b": 50},
+            "xaxis": {"title": {"text": "Longitude (m)"}},
+            "yaxis": {"title": {"text": "Height (m)"}, "scaleanchor": "x", "scaleratio": 1},
         }
     elif plot_type == "Elevation vs. Range":
         az_antenna_el = az_offset * np.cos(roll_rad) + el_ang * np.sin(roll_rad)
@@ -747,9 +747,9 @@ def coverage_plot(
         ]
         fig_layout = {
             "template": pio.templates["seaborn"],
-            "margin": {"l": 20, "r": 5, "t": 30, "b": 20},
-            "xaxis": {"title": "Elevation (deg)"},
-            "yaxis": {"title": "Range (m)"},
+            "margin": {"l": 60, "r": 10, "t": 30, "b": 50},
+            "xaxis": {"title": {"text": "Elevation (deg)"}},
+            "yaxis": {"title": {"text": "Range (m)"}},
         }
 
     container = []

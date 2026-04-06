@@ -95,6 +95,7 @@ rcs_slider = html.Div(
             tooltip={"always_visible": False, "placement": "top"},
         ),
     ],
+    className="mb-3",
 )
 
 # Fascia loss control
@@ -128,6 +129,7 @@ fascia_slider = html.Div(
             tooltip={"always_visible": False, "placement": "top"},
         ),
     ],
+    className="mb-3",
 )
 
 # Manufacturing margin control
@@ -161,6 +163,7 @@ mfg_slider = html.Div(
             tooltip={"always_visible": False, "placement": "top"},
         ),
     ],
+    className="mb-3",
 )
 
 # Temperature-related loss control
@@ -194,6 +197,7 @@ temp_slider = html.Div(
             tooltip={"always_visible": False, "placement": "top"},
         ),
     ],
+    className="mb-3",
 )
 
 # Rain-induced loss control
@@ -227,6 +231,7 @@ rain_slider = html.Div(
             tooltip={"always_visible": False, "placement": "top"},
         ),
     ],
+    className="mb-3",
 )
 
 # Elevation misalignment control
@@ -235,13 +240,13 @@ misalign_slider = html.Div(
     [
         dbc.InputGroup(
             [
-                dbc.InputGroupText("Misalgn"),
+                dbc.InputGroupText("Pitch offset"),
                 dbc.Input(
                     id="misalign-input", type="number", min=-20, max=20, step=1, value=0
                 ),
                 dbc.InputGroupText("deg"),
                 dbc.Tooltip(
-                    "Elevation misalignment",
+                    "Pitch misalignment",
                     target="misalign-input",
                     placement="top",
                 ),
@@ -260,6 +265,7 @@ misalign_slider = html.Div(
             tooltip={"always_visible": False, "placement": "top"},
         ),
     ],
+    className="mb-3",
 )
 
 # Roll offset control
@@ -298,6 +304,7 @@ roll_slider = html.Div(
             tooltip={"always_visible": False, "placement": "top"},
         ),
     ],
+    className="mb-3",
 )
 
 # Azimuth offset control
@@ -306,7 +313,7 @@ az_slider = html.Div(
     [
         dbc.InputGroup(
             [
-                dbc.InputGroupText("Az offset"),
+                dbc.InputGroupText("Yaw offset"),
                 dbc.Input(
                     id="az-offset-input",
                     type="number",
@@ -317,7 +324,7 @@ az_slider = html.Div(
                 ),
                 dbc.InputGroupText("deg"),
                 dbc.Tooltip(
-                    "Azimuth offset",
+                    "Yaw offset",
                     target="az-offset-input",
                     placement="top",
                 ),
@@ -336,6 +343,7 @@ az_slider = html.Div(
             tooltip={"always_visible": False, "placement": "top"},
         ),
     ],
+    className="mb-3",
 )
 
 # Longitudinal position offset control
@@ -369,6 +377,7 @@ long_slider = html.Div(
             tooltip={"always_visible": False, "placement": "top"},
         ),
     ],
+    className="mb-3",
 )
 
 # Lateral position offset control
@@ -402,6 +411,7 @@ lat_slider = html.Div(
             tooltip={"always_visible": False, "placement": "top"},
         ),
     ],
+    className="mb-3",
 )
 
 # Height offset control
@@ -435,6 +445,7 @@ height_slider = html.Div(
             tooltip={"always_visible": False, "placement": "top"},
         ),
     ],
+    className="mb-3",
 )
 
 # Main plotting card containing all UI controls and the plot
@@ -599,9 +610,9 @@ plot_card = dbc.Card(
                                                 ),
                                                 dbc.AccordionItem(
                                                     [
+                                                        az_slider,
                                                         misalign_slider,
                                                         roll_slider,
-                                                        az_slider,
                                                     ],
                                                     title="Orientation",
                                                     item_id="orientation",
@@ -687,10 +698,9 @@ plot_card = dbc.Card(
                                 dbc.InputGroup(
                                     [
                                         dbc.InputGroupText("Legend"),
-                                        dbc.Input(
+                                        dbc.Textarea(
                                             id="legend",
                                             placeholder="Figure legend",
-                                            type="text",
                                         ),
                                         dbc.Button(
                                             "Hold plot",
@@ -745,7 +755,7 @@ def get_app_layout():
             plot_card,
             # html.Hr(),
             dcc.Markdown(
-                "v4.3 | By [Zhengyu Peng](mailto:zhengyu.peng@aptiv.com)",
+                "v5.0 | By [Zhengyu Peng](mailto:zhengyu.peng@aptiv.com)",
                 className="pb-1",
             ),
         ],
