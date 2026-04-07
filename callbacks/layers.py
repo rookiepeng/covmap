@@ -12,6 +12,22 @@ from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 
 
+# Plotly default color cycle — used to give each layer a stable color
+_COLORS = [
+    "#636EFA", "#EF553B", "#00CC96", "#AB63FA", "#FFA15A",
+    "#19D3F3", "#FF6692", "#B6E880", "#FF97FF", "#FECB52",
+]
+
+
+def _pick_color(layers):
+    """Return the next color not yet used by any existing layer."""
+    used = {l.get("color") for l in layers}
+    for c in _COLORS:
+        if c not in used:
+            return c
+    return _COLORS[len(layers) % len(_COLORS)]
+
+
 # Default settings for a new layer
 DEFAULT_SETTINGS = {
     "pd": 0.5,
@@ -136,16 +152,12 @@ def register(app):
         layers = layers or []
 
         if triggered == "add-layer":
-            settings = _collect_settings_from_controls(
-                sensor, pd, pfa, integration, rcs, plot, inset_position, flip,
-                fascia, mfg, temp, rain, az_offset, misalign, roll_offset,
-                long_offset, lat_offset, height_offset, legend,
-            )
             new_id = _new_layer_id()
             new_layer = {
                 "id": new_id,
                 "name": f"Layer {len(layers) + 1}",
-                "settings": settings,
+                "color": _pick_color(layers),
+                "settings": dict(DEFAULT_SETTINGS),
                 "traces": [],
             }
             layers.append(new_layer)
@@ -161,6 +173,7 @@ def register(app):
             dup = copy.deepcopy(src)
             dup["id"] = new_id
             dup["name"] = src["name"] + " (copy)"
+            dup["color"] = _pick_color(layers)
             layers.append(dup)
             return {"layers": layers, "active": new_id}
 
@@ -225,8 +238,9 @@ def register(app):
         if layer is None:
             raise PreventUpdate
         s = layer["settings"]
+        saved_sensor = s.get("sensor")
         return {
-            "sensor": s.get("sensor", dash.no_update),
+            "sensor": saved_sensor if saved_sensor is not None else dash.no_update,
             "pd": s.get("pd", 0.5),
             "pfa": s.get("pfa", 0.0001),
             "integration": s.get("integration", "Swerling 3"),

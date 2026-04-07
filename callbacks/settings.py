@@ -37,6 +37,7 @@ def _default_layer1():
     return {
         "id": _LAYER1_ID,
         "name": "Layer 1",
+        "color": "#636EFA",
         "settings": dict(_DEFAULT_LAYER_SETTINGS),
         "traces": [],
     }
@@ -50,7 +51,12 @@ def register(app):
         prevent_initial_call=True,
     )
     def save_layers(layers, active):
-        data = {"layers": layers or [], "active": active}
+        # Strip traces before saving — they are recomputed at runtime
+        slim_layers = [
+            {k: v for k, v in layer.items() if k != "traces"}
+            for layer in (layers or [])
+        ]
+        data = {"layers": slim_layers, "active": active}
         try:
             with open("./settings.json", "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=4)
@@ -74,6 +80,10 @@ def register(app):
 
                 # New format: has "layers" key
                 if "layers" in saved and saved["layers"]:
+                    # Ensure each layer has an empty traces list and a color
+                    for i, layer in enumerate(saved["layers"]):
+                        layer.setdefault("traces", [])
+                        layer.setdefault("color", ["#636EFA","#EF553B","#00CC96","#AB63FA","#FFA15A"][i % 5])
                     return {
                         "layers": saved["layers"],
                         "active": saved.get("active", saved["layers"][0]["id"]),

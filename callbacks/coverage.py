@@ -12,6 +12,7 @@ import numpy as np
 import plotly.graph_objects as go
 
 from roc.tools import roc_snr
+from callbacks.sensor import load_config as _load_config
 
 
 def register(app):
@@ -94,20 +95,19 @@ def register(app):
             )
 
         # ── Compute traces for active layer from current controls ───
+        layers = list(layers_in or [])
+        active_idx = next((i for i, l in enumerate(layers) if l["id"] == active), None)
+
+        fill_enabled = "fill" in (flip or [])
+        layer_color = layers[active_idx].get("color") if active_idx is not None else None
         traces, fig_layout, container = _compute_layer(
             pd, pfa, rcs, fascia_loss, mfg_loss, temp_loss, rain_loss,
             vert_misalign_angle, roll_offset, az_offset, sw_model,
             plot_type, flip, inset_position,
-            long_offset, lat_offset, height_offset, config, legend,
+            long_offset, lat_offset, height_offset, config, legend, fill_enabled, layer_color,
         )
 
         # ── Update the active layer in layers list ──────────────────
-        layers = list(layers_in or [])
-        active_idx = None
-        for i, l in enumerate(layers):
-            if l["id"] == active:
-                active_idx = i
-                break
 
         if active_idx is not None:
             layers[active_idx] = {
@@ -129,6 +129,37 @@ def register(app):
                     "legend": legend,
                 },
             }
+
+        # ── Backfill other layers that have settings but no traces ──
+        for i, layer in enumerate(layers):
+            if i == active_idx or layer.get("traces"):
+                continue
+            s = layer.get("settings", {})
+            other_sensor = s.get("sensor")
+            if not other_sensor:
+                continue
+            try:
+                other_config = _load_config("./radar/" + other_sensor)
+            except (OSError, KeyError):
+                continue
+            other_fill = "fill" in (s.get("flip") or [])
+            other_color = layer.get("color")
+            other_legend = s.get("legend", "")
+            try:
+                other_traces, _, _ = _compute_layer(
+                    s.get("pd", 0.5), s.get("pfa", 0.0001), s.get("rcs", 10),
+                    s.get("fascia", 0), s.get("mfg", 0), s.get("temp", 0),
+                    s.get("rain", 0), s.get("misalign", 0), s.get("roll_offset", 0),
+                    s.get("az_offset", 0), s.get("integration", "Swerling 3"),
+                    s.get("plot", "Azimuth Coverage"), s.get("flip", []),
+                    s.get("inset_position", "top-left"),
+                    s.get("long_offset", 0), s.get("lat_offset", 0),
+                    s.get("height_offset", 0), other_config, other_legend,
+                    other_fill, other_color,
+                )
+                layers[i] = {**layer, "traces": other_traces}
+            except Exception:
+                pass
 
         # ── Combine all layers' traces; only active gets inset ──────
         all_traces = []
@@ -170,7 +201,7 @@ def _compute_layer(
     pd, pfa, rcs, fascia_loss, mfg_loss, temp_loss, rain_loss,
     vert_misalign_angle, roll_offset, az_offset, sw_model,
     plot_type, flip, inset_position,
-    long_offset, lat_offset, height_offset, config, legend,
+    long_offset, lat_offset, height_offset, config, legend, fill_enabled=True, layer_color=None,
 ):
     """Compute traces, layout, and property container for a single layer."""
 
@@ -283,28 +314,28 @@ def _compute_layer(
             az_ang, az_ang_full, az_ptn_full, el_ang_full, el_ptn_full,
             roll_rad, vert_misalign_angle, az_offset, long_offset, lat_offset,
             az_start, az_end, el_start, el_end, max_range, legend,
-            inset_heatmap, show_inset, inset_axes,
+            inset_heatmap, show_inset, inset_axes, fill_enabled, layer_color,
         )
     elif plot_type == "Azimuth vs. Range":
         traces, fig_layout = _azimuth_vs_range(
             az_ang, az_ang_full, az_ptn_full, el_ang_full, el_ptn_full,
             roll_rad, vert_misalign_angle,
             az_start, az_end, el_start, el_end, max_range, legend,
-            inset_heatmap, show_inset, inset_axes,
+            inset_heatmap, show_inset, inset_axes, fill_enabled, layer_color,
         )
     elif plot_type == "Elevation Coverage":
         traces, fig_layout = _elevation_coverage(
             el_ang, az_ang_full, az_ptn_full, el_ang_full, el_ptn_full,
             roll_rad, vert_misalign_angle, az_offset, long_offset, height_offset,
             az_start, az_end, el_start, el_end, max_range, legend,
-            inset_heatmap, show_inset, inset_axes,
+            inset_heatmap, show_inset, inset_axes, fill_enabled, layer_color,
         )
     elif plot_type == "Elevation vs. Range":
         traces, fig_layout = _elevation_vs_range(
             el_ang, az_ang_full, az_ptn_full, el_ang_full, el_ptn_full,
             roll_rad, az_offset,
             az_start, az_end, el_start, el_end, max_range, legend,
-            inset_heatmap, show_inset, inset_axes,
+            inset_heatmap, show_inset, inset_axes, fill_enabled, layer_color,
         )
 
     container = _build_property_container(
@@ -352,11 +383,28 @@ def _base_layout(xaxis_title, yaxis_title, inset_axes, scale_y_to_x=False):
     return layout
 
 
+def _hex_to_rgba(hex_color, alpha=0.2):
+    """Convert a #RRGGBB hex color to an rgba() string with given alpha."""
+    h = hex_color.lstrip("#")
+    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    return f"rgba({r},{g},{b},{alpha})"
+
+
+def _apply_color(trace, layer_color, fill_enabled):
+    """Attach a stable line color (and semi-transparent fill) to a trace dict."""
+    if not layer_color:
+        return trace
+    trace["line"] = {"color": layer_color}
+    if fill_enabled and layer_color.startswith("#"):
+        trace["fillcolor"] = _hex_to_rgba(layer_color, 0.2)
+    return trace
+
+
 def _azimuth_coverage(
     az_ang, az_ang_full, az_ptn_full, el_ang_full, el_ptn_full,
     roll_rad, vert_misalign_angle, az_offset, long_offset, lat_offset,
     az_start, az_end, el_start, el_end, max_range, legend,
-    inset_heatmap, show_inset, inset_axes,
+    inset_heatmap, show_inset, inset_axes, fill_enabled=True, layer_color=None,
 ):
     az_antenna = az_ang * np.cos(roll_rad) + vert_misalign_angle * np.sin(roll_rad)
     el_antenna = -az_ang * np.sin(roll_rad) + vert_misalign_angle * np.cos(roll_rad)
@@ -368,7 +416,8 @@ def _azimuth_coverage(
     coverage = max_range * 10 ** (combined / 40)
     x = coverage * np.cos((az_ang + az_offset) / 180 * np.pi) + long_offset
     y = coverage * np.sin((az_ang + az_offset) / 180 * np.pi) + lat_offset
-    traces = [{"mode": "lines", "type": "scatter", "x": x, "y": y, "fill": "tozeroy", "name": legend}]
+    trace = {"mode": "lines", "type": "scatter", "x": x, "y": y, "fill": "tozeroy" if fill_enabled else "none", "name": legend}
+    traces = [_apply_color(trace, layer_color, fill_enabled)]
     if show_inset:
         traces.extend([inset_heatmap, _make_inset_cut([az_ang[0], az_ang[-1]], [vert_misalign_angle, vert_misalign_angle])])
     return traces, _base_layout("Longitude (m)", "Latitude (m)", inset_axes, scale_y_to_x=True)
@@ -378,7 +427,7 @@ def _azimuth_vs_range(
     az_ang, az_ang_full, az_ptn_full, el_ang_full, el_ptn_full,
     roll_rad, vert_misalign_angle,
     az_start, az_end, el_start, el_end, max_range, legend,
-    inset_heatmap, show_inset, inset_axes,
+    inset_heatmap, show_inset, inset_axes, fill_enabled=True, layer_color=None,
 ):
     az_antenna = az_ang * np.cos(roll_rad) + vert_misalign_angle * np.sin(roll_rad)
     el_antenna = -az_ang * np.sin(roll_rad) + vert_misalign_angle * np.cos(roll_rad)
@@ -388,7 +437,8 @@ def _azimuth_vs_range(
     oov = (az_antenna < az_start) | (az_antenna > az_end) | (el_antenna < el_start) | (el_antenna > el_end)
     combined[oov] = -1000
     coverage = max_range * 10 ** (combined / 40)
-    traces = [{"mode": "lines", "type": "scatter", "x": az_ang, "y": coverage, "fill": "tozeroy", "name": legend}]
+    trace = {"mode": "lines", "type": "scatter", "x": az_ang, "y": coverage, "fill": "tozeroy" if fill_enabled else "none", "name": legend}
+    traces = [_apply_color(trace, layer_color, fill_enabled)]
     if show_inset:
         traces.extend([inset_heatmap, _make_inset_cut([az_ang[0], az_ang[-1]], [vert_misalign_angle, vert_misalign_angle])])
     return traces, _base_layout("Azimuth (deg)", "Range (m)", inset_axes)
@@ -398,7 +448,7 @@ def _elevation_coverage(
     el_ang, az_ang_full, az_ptn_full, el_ang_full, el_ptn_full,
     roll_rad, vert_misalign_angle, az_offset, long_offset, height_offset,
     az_start, az_end, el_start, el_end, max_range, legend,
-    inset_heatmap, show_inset, inset_axes,
+    inset_heatmap, show_inset, inset_axes, fill_enabled=True, layer_color=None,
 ):
     az_ant = az_offset * np.cos(roll_rad) + el_ang * np.sin(roll_rad)
     el_ant = -az_offset * np.sin(roll_rad) + el_ang * np.cos(roll_rad)
@@ -410,7 +460,8 @@ def _elevation_coverage(
     coverage = max_range * 10 ** (combined / 40)
     x = coverage * np.cos((el_ang + vert_misalign_angle) / 180 * np.pi) + long_offset
     y = coverage * np.sin((el_ang + vert_misalign_angle) / 180 * np.pi) + height_offset
-    traces = [{"mode": "lines", "type": "scatter", "x": x, "y": y, "fill": "tozeroy", "name": legend}]
+    trace = {"mode": "lines", "type": "scatter", "x": x, "y": y, "fill": "tozeroy" if fill_enabled else "none", "name": legend}
+    traces = [_apply_color(trace, layer_color, fill_enabled)]
     if show_inset:
         traces.extend([inset_heatmap, _make_inset_cut([az_offset, az_offset], [el_ang[0], el_ang[-1]])])
     return traces, _base_layout("Longitude (m)", "Height (m)", inset_axes, scale_y_to_x=True)
@@ -420,7 +471,7 @@ def _elevation_vs_range(
     el_ang, az_ang_full, az_ptn_full, el_ang_full, el_ptn_full,
     roll_rad, az_offset,
     az_start, az_end, el_start, el_end, max_range, legend,
-    inset_heatmap, show_inset, inset_axes,
+    inset_heatmap, show_inset, inset_axes, fill_enabled=True, layer_color=None,
 ):
     az_ant = az_offset * np.cos(roll_rad) + el_ang * np.sin(roll_rad)
     el_ant = -az_offset * np.sin(roll_rad) + el_ang * np.cos(roll_rad)
@@ -430,7 +481,8 @@ def _elevation_vs_range(
     oov = (az_ant < az_start) | (az_ant > az_end) | (el_ant < el_start) | (el_ant > el_end)
     combined[oov] = -1000
     coverage = max_range * 10 ** (combined / 40)
-    traces = [{"mode": "lines", "type": "scatter", "x": el_ang, "y": coverage, "fill": "tozeroy", "name": legend}]
+    trace = {"mode": "lines", "type": "scatter", "x": el_ang, "y": coverage, "fill": "tozeroy" if fill_enabled else "none", "name": legend}
+    traces = [_apply_color(trace, layer_color, fill_enabled)]
     if show_inset:
         traces.extend([inset_heatmap, _make_inset_cut([az_offset, az_offset], [el_ang[0], el_ang[-1]])])
     return traces, _base_layout("Elevation (deg)", "Range (m)", inset_axes)

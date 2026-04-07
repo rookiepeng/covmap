@@ -61,8 +61,9 @@ flip_checklist = dbc.Checklist(
     options=[
         {"label": "Flip Azimuth", "value": "flip_az"},
         {"label": "Flip Elevation", "value": "flip_el"},
+        {"label": "Fill", "value": "fill"},
     ],
-    value=[],
+    value=["fill"],
     id="flip-checklist",
     inline=True,
 )
@@ -562,7 +563,7 @@ plot_card = dbc.Row(
                                                 ),
                                                 dbc.Tooltip("Add a new layer", target="add-layer", placement="top"),
                                                 dbc.Button(
-                                                    html.I(className="bi bi-copy"),
+                                                    html.I(className="bi bi-files"),
                                                     id="dup-layer",
                                                     n_clicks=0,
                                                     color="primary",
