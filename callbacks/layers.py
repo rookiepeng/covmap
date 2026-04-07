@@ -105,7 +105,7 @@ def _build_layer_tabs(layers, active_id):
                 id={"type": "layer-tab", "index": lid},
                 size="sm",
                 className="me-1",
-                style=style,
+                style={**style, "pointerEvents": "auto"},
             )
         )
     return buttons
@@ -207,7 +207,26 @@ def register(app):
         if not any(tab_clicks):
             raise PreventUpdate
         clicked_id = ctx.triggered_id["index"]
+        # Ignore stale IDs from deleted/old layers
+        if not any(l["id"] == clicked_id for l in layers):
+            raise PreventUpdate
         return clicked_id
+
+    # ── Sanitize active layer — ensure it always points to a valid layer ─
+
+    @app.callback(
+        Output("active-layer-store", "data", allow_duplicate=True),
+        Input("layers-store", "data"),
+        State("active-layer-store", "data"),
+        prevent_initial_call=True,
+    )
+    def sanitize_active(layers, active):
+        if not layers:
+            return None
+        ids = [l["id"] for l in layers]
+        if active in ids:
+            raise PreventUpdate
+        return ids[-1]
 
     # ── Populate controls when active layer changes ─────────────────
 

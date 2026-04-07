@@ -622,7 +622,7 @@ plot_card = dbc.Row(
                                         "whiteSpace": "nowrap",
                                         "borderBottom": "2px solid #dee2e6",
                                         "marginBottom": "4px",
-                                        # "pointerEvents": "none",
+                                        "pointerEvents": "none",
                                     },
                                 ),
                                 dcc.Graph(
