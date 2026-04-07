@@ -62,9 +62,9 @@ def register(app):
         vert_misalign_angle, roll_offset, az_offset, sw_model, plot_type,
         flip, inset_position,
         long_offset, lat_offset, height_offset,
-        config,
+        config, legend_in,
         min_pd, max_pd, min_pfa, max_pfa,
-        active, layers_in, sensor, legend_in,
+        active, layers_in, sensor,
     ) -> Dict[str, Any]:
         """Recompute the active layer from controls and render all layers."""
 
@@ -83,9 +83,14 @@ def register(app):
             if v is None:
                 raise PreventUpdate
 
-        # ── Legend: always use what the user has typed ─────────────
+        # ── Resolve active layer ─────────────────────────────────────
         layers = list(layers_in or [])
         active_idx = next((i for i, l in enumerate(layers) if l["id"] == active), None)
+
+        # Guard: no valid active layer yet (startup race before load_layers fires)
+        if active_idx is None:
+            raise PreventUpdate
+
         legend = legend_in or ""
 
         # ── Compute traces for active layer from current controls ───

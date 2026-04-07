@@ -6,6 +6,7 @@ import json
 import os
 import base64
 
+import dash
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
@@ -117,10 +118,10 @@ def register(app):
         misalign_min = config["el_fov"][0]
         misalign_max = config["el_fov"][1]
 
-        if misalgin_state < misalign_min or misalgin_state > misalign_max:
-            misalign = 0
+        if misalgin_state is not None and misalign_min <= misalgin_state <= misalign_max:
+            misalign = dash.no_update
         else:
-            misalign = misalgin_state
+            misalign = 0
         return {
             "config": config,
             "misalign_min": misalign_min,
