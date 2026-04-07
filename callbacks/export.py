@@ -58,15 +58,24 @@ def register(app):
         Output("download", "data", allow_duplicate=True),
         Input("export-data", "n_clicks"),
         [
-            State("new-figure-data", "data"),
+            State("layers-store", "data"),
+            State("active-layer-store", "data"),
             State("plot", "value"),
         ],
         prevent_initial_call=True,
     )
     def export_data(
-        unused_n_clicks: Any, data: List[Dict[str, List[float]]], plot_type: str
+        unused_n_clicks: Any, layers: List, active: Any, plot_type: str
     ) -> Any:
-        """Export the raw data as a CSV file."""
+        """Export the raw data of the active layer as a CSV file."""
+        from dash.exceptions import PreventUpdate
+
+        if not layers or not active:
+            raise PreventUpdate
+        layer = next((l for l in layers if l["id"] == active), None)
+        if layer is None or not layer.get("traces"):
+            raise PreventUpdate
+        data = layer["traces"]
         if plot_type == "Azimuth Coverage":
             dataframe = pds.DataFrame(
                 {"longitude_m": data[0]["x"], "latitude_m": data[0]["y"]}

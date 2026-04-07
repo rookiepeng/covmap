@@ -554,23 +554,46 @@ plot_card = dbc.Row(
                                         dbc.ButtonGroup(
                                             [
                                                 dbc.Button(
-                                                    "Clear last held",
-                                                    id="clear-last-plot",
+                                                    html.I(className="bi bi-plus-lg"),
+                                                    id="add-layer",
                                                     n_clicks=0,
-                                                    color="warning",
+                                                    color="success",
                                                     size="sm",
                                                 ),
+                                                dbc.Tooltip("Add a new layer", target="add-layer", placement="top"),
                                                 dbc.Button(
-                                                    "Clear all held",
-                                                    id="clear-plot",
+                                                    html.I(className="bi bi-copy"),
+                                                    id="dup-layer",
+                                                    n_clicks=0,
+                                                    color="primary",
+                                                    size="sm",
+                                                ),
+                                                dbc.Tooltip("Duplicate active layer", target="dup-layer", placement="top"),
+                                                dbc.Button(
+                                                    html.I(className="bi bi-trash"),
+                                                    id="del-layer",
                                                     n_clicks=0,
                                                     color="danger",
                                                     size="sm",
                                                 ),
+                                                dbc.Tooltip("Delete active layer", target="del-layer", placement="top"),
                                             ],
+                                            className="me-auto",
+                                        ),
+                                        dbc.DropdownMenu(
+                                            export_menu_items,
+                                            label="Export",
+                                            color="info",
+                                            size="sm",
                                         ),
                                     ],
-                                    className="d-flex justify-content-end mb-1",
+                                    className="d-flex justify-content-between mb-1",
+                                ),
+                                html.Div(
+                                    id="layer-tabs-container",
+                                    children=[],
+                                    className="mb-1",
+                                    style={"overflowX": "auto", "whiteSpace": "nowrap"},
                                 ),
                                 dcc.Graph(
                                     id="scatter",
@@ -596,20 +619,9 @@ plot_card = dbc.Row(
                                 dbc.InputGroup(
                                     [
                                         dbc.InputGroupText("Legend"),
-                                        dbc.Textarea(
+                                        dbc.Input(
                                             id="legend",
                                             placeholder="Figure legend",
-                                        ),
-                                        dbc.Button(
-                                            "Hold plot",
-                                            id="hold-plot",
-                                            color="success",
-                                            n_clicks=0,
-                                        ),
-                                        dbc.DropdownMenu(
-                                            export_menu_items,
-                                            label="Export",
-                                            color="info",
                                         ),
                                     ],
                                     className="mt-2",
@@ -654,8 +666,8 @@ def get_app_layout():
         [
             dcc.Location(id="url", refresh=False),
             dcc.Store(id="config"),
-            dcc.Store(id="figure-data", data=[]),
-            dcc.Store(id="new-figure-data", data=[]),
+            dcc.Store(id="layers-store", data=[]),
+            dcc.Store(id="active-layer-store", data=None),
             dcc.Store(id="sensor-store", data=saved_sensor),
             dcc.Store(id="app-settings"),
             dcc.Download(id="download"),

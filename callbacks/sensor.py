@@ -110,6 +110,9 @@ def register(app):
     def sensor_select(sensor: str, misalgin_state: float) -> Dict[str, Any]:
         """Configure display parameters based on selected radar sensor."""
 
+        if sensor is None:
+            raise PreventUpdate
+
         config = load_config("./radar/" + sensor)
         misalign_min = config["el_fov"][0]
         misalign_max = config["el_fov"][1]
