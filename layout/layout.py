@@ -611,7 +611,7 @@ plot_card = dbc.Row(
                                         ),
                                     ],
                                     className="d-flex align-items-center gap-1",
-                                    style={"borderBottom": "2px solid #dee2e6", "paddingBottom": "4px", "marginBottom": "0"},
+                                    style={"paddingBottom": "4px", "marginBottom": "4px"},
                                 ),
                                 html.Div(
                                     id="layer-tabs-container",
@@ -622,7 +622,7 @@ plot_card = dbc.Row(
                                         "whiteSpace": "nowrap",
                                         "borderBottom": "2px solid #dee2e6",
                                         "marginBottom": "4px",
-                                        "minHeight": "34px",
+                                        # "pointerEvents": "none",
                                     },
                                 ),
                                 dcc.Graph(
