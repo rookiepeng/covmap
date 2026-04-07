@@ -3,7 +3,7 @@
 from typing import Dict, List, Any
 
 import dash
-from dash import dcc, ctx
+from dash import dcc
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
@@ -13,6 +13,7 @@ import plotly.graph_objects as go
 
 from roc.tools import roc_snr
 from callbacks.sensor import load_config as _load_config
+from callbacks.colors import color_for_idx as _color_for_idx, hex_to_rgba as _hex_to_rgba
 
 
 def register(app):
@@ -21,7 +22,6 @@ def register(app):
             "fig": Output("scatter", "figure"),
             "layers": Output("layers-store", "data", allow_duplicate=True),
             "property_container": Output("property-container", "children"),
-            "legend_out": Output("legend", "value", allow_duplicate=True),
         },
         inputs={
             # Only controls and config are Inputs (triggers).
@@ -37,13 +37,13 @@ def register(app):
             "az_offset": Input("az-offset", "value"),
             "sw_model": Input("integration", "value"),
             "plot_type": Input("plot", "value"),
-            "new_legend_entry": Input("legend", "value"),
             "flip": Input("flip-checklist", "value"),
             "inset_position": Input("inset-position", "value"),
             "long_offset": Input("long", "value"),
             "lat_offset": Input("lat", "value"),
             "height_offset": Input("height", "value"),
             "config": Input("config", "data"),
+            "legend_in": Input("legend", "value"),
         },
         state={
             # Layer stores are State — never trigger this callback.
@@ -60,12 +60,11 @@ def register(app):
     def coverage_plot(
         pd, pfa, rcs, fascia_loss, mfg_loss, temp_loss, rain_loss,
         vert_misalign_angle, roll_offset, az_offset, sw_model, plot_type,
-        new_legend_entry,
         flip, inset_position,
         long_offset, lat_offset, height_offset,
         config,
         min_pd, max_pd, min_pfa, max_pfa,
-        active, layers_in, sensor,
+        active, layers_in, sensor, legend_in,
     ) -> Dict[str, Any]:
         """Recompute the active layer from controls and render all layers."""
 
@@ -84,22 +83,14 @@ def register(app):
             if v is None:
                 raise PreventUpdate
 
-        # ── Build legend ────────────────────────────────────────────
-        triggered = ctx.triggered_id
-        if triggered == "legend":
-            legend = new_legend_entry
-        else:
-            legend = _auto_legend(
-                rcs, sw_model, fascia_loss, temp_loss, rain_loss,
-                mfg_loss, vert_misalign_angle,
-            )
-
-        # ── Compute traces for active layer from current controls ───
+        # ── Legend: always use what the user has typed ─────────────
         layers = list(layers_in or [])
         active_idx = next((i for i, l in enumerate(layers) if l["id"] == active), None)
+        legend = legend_in or ""
 
+        # ── Compute traces for active layer from current controls ───
         fill_enabled = "fill" in (flip or [])
-        layer_color = layers[active_idx].get("color") if active_idx is not None else None
+        layer_color = _color_for_idx(active_idx) if active_idx is not None else None
         traces, fig_layout, container = _compute_layer(
             pd, pfa, rcs, fascia_loss, mfg_loss, temp_loss, rain_loss,
             vert_misalign_angle, roll_offset, az_offset, sw_model,
@@ -143,7 +134,7 @@ def register(app):
             except (OSError, KeyError):
                 continue
             other_fill = "fill" in (s.get("flip") or [])
-            other_color = layer.get("color")
+            other_color = _color_for_idx(i)
             other_legend = s.get("legend", "")
             try:
                 other_traces, _, _ = _compute_layer(
@@ -177,24 +168,12 @@ def register(app):
             "fig": go.Figure(data=all_traces, layout=fig_layout).to_dict(),
             "layers": layers,
             "property_container": container,
-            "legend_out": legend,
         }
 
 
 # ---------------------------------------------------------------------------
 # Helper functions
 # ---------------------------------------------------------------------------
-
-
-def _auto_legend(rcs, sw_model, fascia_loss, temp_loss, rain_loss, mfg_loss, misalign):
-    return (
-        f"{rcs} dBsm, {sw_model},<br>"
-        f"{abs(fascia_loss)} dB Fascia Loss,<br>"
-        f"{abs(temp_loss)} dB Temp Loss,<br>"
-        f"{abs(rain_loss)} dB Rain Loss,<br>"
-        f"{abs(mfg_loss)} dB MFG,<br>"
-        f"{misalign} deg Misalignment<br>"
-    )
 
 
 def _compute_layer(
@@ -381,13 +360,6 @@ def _base_layout(xaxis_title, yaxis_title, inset_axes, scale_y_to_x=False):
         layout["yaxis"]["scaleratio"] = 1
     layout.update(inset_axes)
     return layout
-
-
-def _hex_to_rgba(hex_color, alpha=0.2):
-    """Convert a #RRGGBB hex color to an rgba() string with given alpha."""
-    h = hex_color.lstrip("#")
-    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
-    return f"rgba({r},{g},{b},{alpha})"
 
 
 def _apply_color(trace, layer_color, fill_enabled):

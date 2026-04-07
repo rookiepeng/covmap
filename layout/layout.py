@@ -554,47 +554,76 @@ plot_card = dbc.Row(
                                     [
                                         dbc.ButtonGroup(
                                             [
-                                                dbc.Button(
-                                                    html.I(className="bi bi-plus-lg"),
-                                                    id="add-layer",
-                                                    n_clicks=0,
-                                                    color="success",
-                                                    size="sm",
-                                                ),
+                                                dbc.Button(html.I(className="bi bi-plus-lg"), id="add-layer", n_clicks=0, color="success", size="sm"),
                                                 dbc.Tooltip("Add a new layer", target="add-layer", placement="top"),
-                                                dbc.Button(
-                                                    html.I(className="bi bi-files"),
-                                                    id="dup-layer",
-                                                    n_clicks=0,
-                                                    color="primary",
-                                                    size="sm",
-                                                ),
+                                                dbc.Button(html.I(className="bi bi-files"), id="dup-layer", n_clicks=0, color="primary", size="sm"),
                                                 dbc.Tooltip("Duplicate active layer", target="dup-layer", placement="top"),
-                                                dbc.Button(
-                                                    html.I(className="bi bi-trash"),
-                                                    id="del-layer",
-                                                    n_clicks=0,
-                                                    color="danger",
-                                                    size="sm",
-                                                ),
+                                                dbc.Button(html.I(className="bi bi-trash"), id="del-layer", n_clicks=0, color="danger", size="sm"),
                                                 dbc.Tooltip("Delete active layer", target="del-layer", placement="top"),
                                             ],
-                                            className="me-auto",
                                         ),
-                                        dbc.DropdownMenu(
-                                            export_menu_items,
-                                            label="Export",
-                                            color="info",
-                                            size="sm",
+                                        html.Div(style={"width": "1px", "background": "#dee2e6", "alignSelf": "stretch", "margin": "0 6px"}),
+                                        html.Div(
+                                            [
+                                                dcc.Upload(
+                                                    id="upload-layers",
+                                                    children=dbc.Button(
+                                                        [html.I(className="bi bi-folder2-open"), " Load"],
+                                                        color="secondary", size="sm",
+                                                        style={"borderRadius": "4px 0 0 4px"},
+                                                    ),
+                                                    accept="application/json",
+                                                    style={"display": "inline-block"},
+                                                ),
+                                                dbc.Button(
+                                                    [html.I(className="bi bi-download"), " Save"],
+                                                    id="save-layers-btn", n_clicks=0, color="secondary", size="sm",
+                                                    style={"borderRadius": "0 4px 4px 0", "marginLeft": "-1px"},
+                                                ),
+                                                dbc.Tooltip("Load layers from a JSON file", target="upload-layers", placement="top"),
+                                                dbc.Tooltip("Save all layer configs to a JSON file", target="save-layers-btn", placement="top"),
+                                            ],
+                                            className="d-flex",
+                                        ),
+                                        html.Div(className="ms-auto"),
+                                        dbc.DropdownMenu(export_menu_items, label="Export", color="info", size="sm"),
+                                        dbc.Modal(
+                                            [
+                                                dbc.ModalHeader(dbc.ModalTitle("Save Layers")),
+                                                dbc.ModalBody(
+                                                    dbc.InputGroup(
+                                                        [
+                                                            dbc.InputGroupText(html.I(className="bi bi-file-earmark-code")),
+                                                            dbc.Input(id="save-layers-filename", value="layers", placeholder="filename (no extension)"),
+                                                            dbc.InputGroupText(".json"),
+                                                        ],
+                                                        size="sm",
+                                                    ),
+                                                ),
+                                                dbc.ModalFooter(
+                                                    [
+                                                        dbc.Button("Download", id="save-layers-confirm", color="primary", size="sm"),
+                                                        dbc.Button("Cancel", id="save-layers-cancel", color="secondary", size="sm", className="ms-2"),
+                                                    ]
+                                                ),
+                                            ],
+                                            id="save-layers-modal", is_open=False, size="sm",
                                         ),
                                     ],
-                                    className="d-flex justify-content-between mb-1",
+                                    className="d-flex align-items-center gap-1",
+                                    style={"borderBottom": "2px solid #dee2e6", "paddingBottom": "4px", "marginBottom": "0"},
                                 ),
                                 html.Div(
                                     id="layer-tabs-container",
                                     children=[],
-                                    className="mb-1",
-                                    style={"overflowX": "auto", "whiteSpace": "nowrap"},
+                                    style={
+                                        "overflowX": "auto",
+                                        "overflowY": "hidden",
+                                        "whiteSpace": "nowrap",
+                                        "borderBottom": "2px solid #dee2e6",
+                                        "marginBottom": "4px",
+                                        "minHeight": "34px",
+                                    },
                                 ),
                                 dcc.Graph(
                                     id="scatter",

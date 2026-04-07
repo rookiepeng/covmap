@@ -11,21 +11,7 @@ from dash.exceptions import PreventUpdate
 
 import dash_bootstrap_components as dbc
 
-
-# Plotly default color cycle — used to give each layer a stable color
-_COLORS = [
-    "#636EFA", "#EF553B", "#00CC96", "#AB63FA", "#FFA15A",
-    "#19D3F3", "#FF6692", "#B6E880", "#FF97FF", "#FECB52",
-]
-
-
-def _pick_color(layers):
-    """Return the next color not yet used by any existing layer."""
-    used = {l.get("color") for l in layers}
-    for c in _COLORS:
-        if c not in used:
-            return c
-    return _COLORS[len(layers) % len(_COLORS)]
+from callbacks.colors import color_for_idx, hex_to_rgba
 
 
 # Default settings for a new layer
@@ -83,21 +69,45 @@ def _collect_settings_from_controls(
 
 
 def _build_layer_tabs(layers, active_id):
-    """Build a row of layer tab buttons."""
+    """Build a row of tab-style layer buttons."""
     buttons = []
-    for layer in layers:
+    for idx, layer in enumerate(layers):
         lid = layer["id"]
         is_active = lid == active_id
         name = layer.get("name", "Layer")
+        label = f"{idx + 1}. {name}"
+        plot_color = color_for_idx(idx)
+        if is_active:
+            style = {
+                "fontSize": "0.75rem",
+                "borderRadius": "4px 4px 0 0",
+                "marginBottom": "-2px",
+                "position": "relative",
+                "zIndex": "1",
+                "background": hex_to_rgba(plot_color, 0.08),
+                "color": plot_color,
+                "border": f"1px solid {plot_color}",
+                "borderBottom": "2px solid #fff",
+                "fontWeight": "600",
+                "boxShadow": f"0 -2px 0 0 {plot_color}",
+            }
+        else:
+            style = {
+                "fontSize": "0.75rem",
+                "borderRadius": "4px 4px 0 0",
+                "marginBottom": "-2px",
+                "background": "#f8f9fa",
+                "color": "#6c757d",
+                "border": "1px solid transparent",
+                "borderBottom": "1px solid #dee2e6",
+            }
         buttons.append(
             dbc.Button(
-                name,
+                label,
                 id={"type": "layer-tab", "index": lid},
-                color="primary" if is_active else "secondary",
-                outline=not is_active,
                 size="sm",
                 className="me-1",
-                style={"fontSize": "0.75rem"},
+                style=style,
             )
         )
     return buttons
@@ -156,7 +166,6 @@ def register(app):
             new_layer = {
                 "id": new_id,
                 "name": f"Layer {len(layers) + 1}",
-                "color": _pick_color(layers),
                 "settings": dict(DEFAULT_SETTINGS),
                 "traces": [],
             }
@@ -173,7 +182,6 @@ def register(app):
             dup = copy.deepcopy(src)
             dup["id"] = new_id
             dup["name"] = src["name"] + " (copy)"
-            dup["color"] = _pick_color(layers)
             layers.append(dup)
             return {"layers": layers, "active": new_id}
 
