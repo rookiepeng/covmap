@@ -86,10 +86,8 @@ def _build_layer_tabs(layers, active_id):
                 "zIndex": "1",
                 "background": hex_to_rgba(plot_color, 0.08),
                 "color": plot_color,
-                "border": f"1px solid {plot_color}",
+                "border": f"2px solid {plot_color}",
                 "borderBottom": "2px solid #fff",
-                "fontWeight": "600",
-                "boxShadow": f"0 -2px 0 0 {plot_color}",
             }
         else:
             style = {
@@ -98,8 +96,8 @@ def _build_layer_tabs(layers, active_id):
                 "marginBottom": "-2px",
                 "background": "#f8f9fa",
                 "color": "#6c757d",
-                "border": "1px solid transparent",
-                "borderBottom": "1px solid #dee2e6",
+                "border": "2px solid transparent",
+                "borderBottom": "2px solid #dee2e6",
             }
         buttons.append(
             dbc.Button(
