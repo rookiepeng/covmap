@@ -32,5 +32,5 @@ register_all(app)
 
 if __name__ == "__main__":
     FlaskUI(
-        app=server, server="flask", port=34687, profile_dir_prefix="coverage_app"
+        app=server, server="flask", port=34687, profile_dir_prefix="coverage_app", fullscreen=True
     ).run()
