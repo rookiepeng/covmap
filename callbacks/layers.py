@@ -5,13 +5,13 @@ import uuid
 import copy
 
 import dash
-from dash import html, dcc, ctx, ALL, MATCH
+from dash import html, dcc, ctx
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 import dash_bootstrap_components as dbc
 
-from callbacks.colors import color_for_idx, hex_to_rgba
+from callbacks.colors import color_for_idx
 
 
 # Default settings for a new layer
@@ -68,47 +68,27 @@ def _collect_settings_from_controls(
     }
 
 
-def _build_layer_tabs(layers, active_id):
-    """Build a row of tab-style layer buttons."""
-    buttons = []
+def _build_layer_tabs(layers):
+    """Build dbc.Tab items for the layer tab bar."""
+    tabs = []
     for idx, layer in enumerate(layers):
         lid = layer["id"]
-        is_active = lid == active_id
         name = layer.get("name", "Layer")
         label = f"{idx + 1}. {name}"
         plot_color = color_for_idx(idx)
-        if is_active:
-            style = {
-                "fontSize": "0.75rem",
-                "borderRadius": "4px 4px 0 0",
-                "marginBottom": "-2px",
-                "position": "relative",
-                "zIndex": "1",
-                "background": hex_to_rgba(plot_color, 0.08),
-                "color": plot_color,
-                "border": f"2px solid {plot_color}",
-                "borderBottom": "2px solid #fff",
-            }
-        else:
-            style = {
-                "fontSize": "0.75rem",
-                "borderRadius": "4px 4px 0 0",
-                "marginBottom": "-2px",
-                "background": "#f8f9fa",
-                "color": "#6c757d",
-                "border": "2px solid transparent",
-                "borderBottom": "2px solid #dee2e6",
-            }
-        buttons.append(
-            dbc.Button(
-                label,
-                id={"type": "layer-tab", "index": lid},
-                size="sm",
-                className="me-1",
-                style={**style, "pointerEvents": "auto"},
+        tabs.append(
+            dbc.Tab(
+                label=label,
+                tab_id=lid,
+                label_style={"fontSize": "0.75rem", "color": "#6c757d"},
+                active_label_style={
+                    "fontSize": "0.75rem",
+                    "color": plot_color,
+                    "fontWeight": "600",
+                },
             )
         )
-    return buttons
+    return tabs
 
 
 def register(app):
@@ -196,37 +176,14 @@ def register(app):
 
     @app.callback(
         Output("active-layer-store", "data", allow_duplicate=True),
-        inputs={"tab_clicks": Input({"type": "layer-tab", "index": ALL}, "n_clicks")},
-        state={"layers": State("layers-store", "data")},
-        prevent_initial_call=True,
-    )
-    def select_layer(tab_clicks, layers):
-        if not ctx.triggered_id or not layers:
-            raise PreventUpdate
-        # Ignore fires from button regeneration (no actual click)
-        if not any(tab_clicks):
-            raise PreventUpdate
-        clicked_id = ctx.triggered_id["index"]
-        # Ignore stale IDs from deleted/old layers
-        if not any(l["id"] == clicked_id for l in layers):
-            raise PreventUpdate
-        return clicked_id
-
-    # ── Sanitize active layer — ensure it always points to a valid layer ─
-
-    @app.callback(
-        Output("active-layer-store", "data", allow_duplicate=True),
-        Input("layers-store", "data"),
+        Input("layer-tabs", "active_tab"),
         State("active-layer-store", "data"),
         prevent_initial_call=True,
     )
-    def sanitize_active(layers, active):
-        if not layers:
-            return None
-        ids = [l["id"] for l in layers]
-        if active in ids:
+    def select_layer(active_tab, current_active):
+        if not active_tab or active_tab == current_active:
             raise PreventUpdate
-        return ids[-1]
+        return active_tab
 
     # ── Populate controls when active layer changes ─────────────────
 
@@ -289,10 +246,16 @@ def register(app):
     # ── Render layer tabs ───────────────────────────────────────────
 
     @app.callback(
-        Output("layer-tabs-container", "children"),
+        Output("layer-tabs", "children"),
+        Output("layer-tabs", "active_tab"),
         Input("layers-store", "data"),
         Input("active-layer-store", "data"),
     )
     def render_tabs(layers, active):
         layers = layers or []
-        return _build_layer_tabs(layers, active)
+        tabs = _build_layer_tabs(layers)
+        # Ensure active_tab points to a valid layer
+        ids = [l["id"] for l in layers]
+        if active not in ids:
+            active = ids[-1] if ids else None
+        return tabs, active

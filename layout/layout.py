@@ -613,17 +613,10 @@ plot_card = dbc.Row(
                                     className="d-flex align-items-center gap-1",
                                     style={"paddingBottom": "4px", "marginBottom": "4px"},
                                 ),
-                                html.Div(
-                                    id="layer-tabs-container",
-                                    children=[],
-                                    style={
-                                        "overflowX": "auto",
-                                        "overflowY": "hidden",
-                                        "whiteSpace": "nowrap",
-                                        "borderBottom": "2px solid #dee2e6",
-                                        "marginBottom": "4px",
-                                        "pointerEvents": "none",
-                                    },
+                                dbc.Tabs(
+                                    id="layer-tabs",
+                                    active_tab=None,
+                                    style={"marginBottom": "4px"},
                                 ),
                                 dcc.Graph(
                                     id="scatter",
