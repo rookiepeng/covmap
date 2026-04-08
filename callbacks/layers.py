@@ -172,6 +172,47 @@ def register(app):
 
         raise PreventUpdate
 
+    # ── Move active layer left / right ──────────────────────────────
+
+    @app.callback(
+        output={
+            "layers": Output("layers-store", "data", allow_duplicate=True),
+            "replot": Output("replot-trigger", "data", allow_duplicate=True),
+        },
+        inputs={
+            "left_btn": Input("move-layer-left", "n_clicks"),
+            "right_btn": Input("move-layer-right", "n_clicks"),
+        },
+        state={
+            "layers": State("layers-store", "data"),
+            "active": State("active-layer-store", "data"),
+            "replot": State("replot-trigger", "data"),
+        },
+        prevent_initial_call=True,
+    )
+    def move_layer(left_btn, right_btn, layers, active, replot):
+        triggered = ctx.triggered_id
+        layers = layers or []
+        if not active or not layers:
+            raise PreventUpdate
+        idx = next((i for i, l in enumerate(layers) if l["id"] == active), None)
+        if idx is None:
+            raise PreventUpdate
+        if triggered == "move-layer-left":
+            if idx == 0:
+                raise PreventUpdate
+            layers[idx - 1], layers[idx] = layers[idx], layers[idx - 1]
+        elif triggered == "move-layer-right":
+            if idx == len(layers) - 1:
+                raise PreventUpdate
+            layers[idx + 1], layers[idx] = layers[idx], layers[idx + 1]
+        else:
+            raise PreventUpdate
+        # Clear cached traces so coverage_plot recolors all layers by new index
+        for layer in layers:
+            layer["traces"] = []
+        return {"layers": layers, "replot": (replot or 0) + 1}
+
     # ── Select layer via tab click ──────────────────────────────────
 
     @app.callback(

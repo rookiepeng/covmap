@@ -562,6 +562,14 @@ plot_card = dbc.Row(
                                                 dbc.Tooltip("Delete active layer", target="del-layer", placement="top"),
                                             ],
                                         ),
+                                        dbc.ButtonGroup(
+                                            [
+                                                dbc.Button(html.I(className="bi bi-arrow-left"), id="move-layer-left", n_clicks=0, color="secondary", size="sm"),
+                                                dbc.Tooltip("Move active layer left", target="move-layer-left", placement="top"),
+                                                dbc.Button(html.I(className="bi bi-arrow-right"), id="move-layer-right", n_clicks=0, color="secondary", size="sm"),
+                                                dbc.Tooltip("Move active layer right", target="move-layer-right", placement="top"),
+                                            ],
+                                        ),
                                         html.Div(style={"width": "1px", "background": "#dee2e6", "alignSelf": "stretch", "margin": "0 6px"}),
                                         html.Div(
                                             [
@@ -691,12 +699,13 @@ def get_app_layout():
             dcc.Store(id="config"),
             dcc.Store(id="layers-store", data=[]),
             dcc.Store(id="active-layer-store", data=None),
+            dcc.Store(id="replot-trigger", data=0),
             dcc.Store(id="sensor-store", data=saved_sensor),
             dcc.Store(id="app-settings"),
             dcc.Download(id="download"),
             plot_card,
             dcc.Markdown(
-                "v5.1 | By [Zhengyu Peng](mailto:zhengyu.peng@aptiv.com)",
+                "v5.2 | By [Zhengyu Peng](mailto:zhengyu.peng@aptiv.com)",
                 className="footer-text px-2",
             ),
         ],

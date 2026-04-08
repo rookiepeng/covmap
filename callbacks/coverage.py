@@ -44,6 +44,7 @@ def register(app):
             "height_offset": Input("height", "value"),
             "config": Input("config", "data"),
             "legend_in": Input("legend", "value"),
+            "replot_trigger": Input("replot-trigger", "data"),
         },
         state={
             # Layer stores are State — never trigger this callback.
@@ -62,7 +63,7 @@ def register(app):
         vert_misalign_angle, roll_offset, az_offset, sw_model, plot_type,
         flip, inset_position,
         long_offset, lat_offset, height_offset,
-        config, legend_in,
+        config, legend_in, replot_trigger,
         min_pd, max_pd, min_pfa, max_pfa,
         active, layers_in, sensor,
     ) -> Dict[str, Any]:
