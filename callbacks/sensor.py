@@ -115,6 +115,18 @@ def register(app):
             raise PreventUpdate
 
         config = load_config("./radar/" + sensor)
+
+        if "requirement" in config:
+            # Requirement configs define angle vs range directly;
+            # they have no elevation FOV, so disable misalignment.
+            return {
+                "config": config,
+                "misalign_min": 0,
+                "misalign_max": 0,
+                "misalign": 0,
+                "sensor_store": sensor,
+            }
+
         misalign_min = config["el_fov"][0]
         misalign_max = config["el_fov"][1]
 

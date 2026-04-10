@@ -190,6 +190,13 @@ def _compute_layer(
 ):
     """Compute traces, layout, and property container for a single layer."""
 
+    # ── Requirement config: simple angle-vs-range ───────────────────
+    if "requirement" in config:
+        return _compute_requirement_layer(
+            config, plot_type, az_offset, long_offset, lat_offset, height_offset,
+            legend, fill_enabled, layer_color,
+        )
+
     flip_az = "flip_az" in (flip or [])
     flip_el = "flip_el" in (flip or [])
 
@@ -214,7 +221,7 @@ def _compute_layer(
     chamber_el = config.get("chamber_el", 0)
     straddling_loss = config["straddling_loss"]
     channels = config["num_channels"]
-    discription = config.get("discription", None)
+    description = config.get("description", None)
     extra_gain_loss = config.get("extra_proc_gain_loss", 0)
 
     # Azimuth pattern
@@ -324,7 +331,7 @@ def _compute_layer(
         )
 
     container = _build_property_container(
-        discription, chamber_snr, chamber_rcs, chamber_range,
+        description, chamber_snr, chamber_rcs, chamber_range,
         channels, min_snr, nci_gain, straddling_loss,
         el_missalign_loss, extra_gain_loss,
     )
@@ -341,6 +348,48 @@ def _compute_layer(
         serializable_traces.append(st)
 
     return serializable_traces, fig_layout, container
+
+
+def _compute_requirement_layer(
+    config, plot_type, az_offset, long_offset, lat_offset, height_offset,
+    legend, fill_enabled=True, layer_color=None,
+):
+    """Compute traces for a requirement config (angle vs range)."""
+    angle = np.array(config["angle"], dtype=float)
+    rng = np.array(config["range"], dtype=float)
+    description = config.get("description", None)
+
+    if plot_type in ("Azimuth Coverage", "Elevation Coverage"):
+        offset = az_offset if plot_type == "Azimuth Coverage" else 0
+        x_off = long_offset if plot_type == "Azimuth Coverage" else long_offset
+        y_off = lat_offset if plot_type == "Azimuth Coverage" else height_offset
+        x = rng * np.cos((angle + offset) / 180 * np.pi) + x_off
+        y = rng * np.sin((angle + offset) / 180 * np.pi) + y_off
+        trace = {
+            "mode": "lines", "type": "scatter", "x": x.tolist(), "y": y.tolist(),
+            "fill": "tozeroy" if fill_enabled else "none", "name": legend,
+        }
+        traces = [_apply_color(trace, layer_color, fill_enabled)]
+        x_label = "Longitude (m)"
+        y_label = "Latitude (m)" if plot_type == "Azimuth Coverage" else "Height (m)"
+        fig_layout = _base_layout(x_label, y_label, {}, scale_y_to_x=True)
+    else:
+        # Azimuth vs. Range / Elevation vs. Range
+        trace = {
+            "mode": "lines", "type": "scatter",
+            "x": angle.tolist(), "y": rng.tolist(),
+            "fill": "tozeroy" if fill_enabled else "none", "name": legend,
+        }
+        traces = [_apply_color(trace, layer_color, fill_enabled)]
+        x_label = "Azimuth (deg)" if "Azimuth" in plot_type else "Elevation (deg)"
+        fig_layout = _base_layout(x_label, "Range (m)", {})
+
+    container = []
+    if description is not None:
+        container.append(dbc.FormText(description, color="primary"))
+    container.append(dbc.FormText(f"Requirement: {config['requirement']}"))
+
+    return traces, fig_layout, container
 
 
 def _make_inset_cut(x_range, y_range):
@@ -467,13 +516,13 @@ def _elevation_vs_range(
 
 
 def _build_property_container(
-    discription, chamber_snr, chamber_rcs, chamber_range,
+    description, chamber_snr, chamber_rcs, chamber_range,
     channels, min_snr, nci_gain, straddling_loss,
     el_missalign_loss, extra_gain_loss,
 ):
     container = []
-    if discription is not None:
-        container.append(dbc.FormText(dcc.Markdown(discription, dangerously_allow_html=True), color="primary"))
+    if description is not None:
+        container.append(dbc.FormText(dcc.Markdown(description, dangerously_allow_html=True), color="primary"))
     container.append(dbc.FormText(f"Chamber SNR: {chamber_snr} dB ({chamber_rcs} dBsm at {chamber_range} m)"))
     container.append(dbc.FormText(f"Number of NCI Channels: {channels}"))
     container.append(dbc.FormText(f"Min SNR: {round(min_snr, 3)} dB"))
