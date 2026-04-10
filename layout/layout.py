@@ -705,7 +705,7 @@ def get_app_layout():
             dcc.Download(id="download"),
             plot_card,
             dcc.Markdown(
-                "v5.2 | By [Zhengyu Peng](mailto:zhengyu.peng@aptiv.com)",
+                "v5.3 | By [Zhengyu Peng](mailto:zhengyu.peng@aptiv.com)",
                 className="footer-text px-2",
             ),
         ],
